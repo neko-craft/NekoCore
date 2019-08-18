@@ -1,0 +1,11 @@
+name: NekoCore
+version: @version@
+main: net.nekocraft.nekocore.Main
+api-version: 1.13
+authors: [Shirasawa]
+description: NekoCraft only.
+website: nekocraft.net
+commands:
+  show:
+    description: Show a item.
+    usage: /show
