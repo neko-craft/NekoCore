@@ -11,6 +11,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -33,7 +34,8 @@ public class ShowItem implements CommandExecutor {
             new TextComponent(convertItemStackToJson(i))
         };
 
-        String sn = "[" + i.getI18NDisplayName() + "]";
+        ItemMeta im = i.getItemMeta();
+        String sn = "[" + (im.hasDisplayName() ? im.getDisplayName() : i.getI18NDisplayName()) + "]";
         if (i.getAmount() > 1) sn += "x" + i.getAmount();
         TextComponent c3 = new TextComponent(sn);
         c3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverEventComponents));

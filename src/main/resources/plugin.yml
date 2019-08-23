@@ -9,3 +9,6 @@ commands:
   show:
     description: Show a item.
     usage: /show
+  toggle:
+    description: Toggle gamemode.
+    usage: /toggle

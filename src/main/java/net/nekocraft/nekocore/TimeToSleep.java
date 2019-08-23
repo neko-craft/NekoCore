@@ -14,8 +14,10 @@ import java.util.Objects;
 public final class TimeToSleep implements Listener {
     private World w;
     private int current = 0;
+    private Main plugin;
 
-    TimeToSleep() {
+    TimeToSleep(Main plugin) {
+        this.plugin = plugin;
         w = Objects.requireNonNull(Bukkit.getWorld("world"));
     }
 
@@ -23,30 +25,34 @@ public final class TimeToSleep implements Listener {
     public void onSleep(PlayerBedEnterEvent e) {
         if (w.isDayTime() || e.getBedEnterResult() != PlayerBedEnterEvent.BedEnterResult.OK) return;
         current++;
-        int all = 0;
-        for (Player p : w.getPlayers()) {
-            if (p.getInventory().getItemInMainHand().getType() != Material.FISHING_ROD &&
-                !p.getDisplayName().startsWith("¡ì7")) all++;
-        }
-        all = (int) Math.floor((float) all / 2);
-        String str = e.getPlayer().getDisplayName() + " ¡ìbº°ÄãË¯¾õ¾õÀ²! ¡ì7(¡ìf" + current + "¡ì7 / ¡ìf" + all + "¡ì7)";
+        int all = getAll();
+        String str = (e.getPlayer().getName().startsWith("Lulu")
+            ? "¡ìaÂ¶Â¶" : e.getPlayer().getDisplayName()) +
+            " ¡ìbº°ÄãË¯¾õ¾õÀ²! ¡ì7(¡ìf" + current + "¡ì7 / ¡ìf" + all + "¡ì7)";
+        w.getPlayers().forEach(p -> p.sendMessage(str));
         if (all > current) {
-            w.getPlayers().forEach(p -> {
-                if (!p.isSleeping()) p.sendMessage(str);
-            });
-        } else {
-            w.setTime(1000);
-            current = 0;
-            w.getPlayers().forEach(p -> p.sendActionBar("¡ìeÃþÁË, Ë¬µ½!"));
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                w.setTime(6000);
+                current = 0;
+                w.getPlayers().forEach(p -> p.sendActionBar("¡ìeÃþÁË, Ë¬µ½!"));
+            }, 20 * 5);
         }
     }
 
     @EventHandler
     public void onLeave(PlayerBedLeaveEvent e) {
+        if (w.isDayTime()) return;
         if (current > 0) current--;
-        String str = e.getPlayer().getDisplayName() + " ¡ìe´¹ËÀ²¡ÖÐ¾ª×øÆð!";
-        w.getPlayers().forEach(p -> {
-            if (p.isSleeping()) p.sendMessage(str);
-        });
+        String str = e.getPlayer().getDisplayName() + " ¡ìe´¹ËÀ²¡ÖÐ¾ª×øÆð! ¡ì7(¡ìf" + current + "¡ì7 / ¡ìf" + getAll() + "¡ì7)";
+        w.getPlayers().forEach(p -> p.sendMessage(str));
+    }
+
+    private int getAll() {
+        int all = 0;
+        for (Player p : w.getPlayers()) {
+            if (p.getInventory().getItemInMainHand().getType() != Material.FISHING_ROD &&
+                !p.getDisplayName().startsWith("¡ì7")) all++;
+        }
+        return (int) Math.floor((float) all / 2);
     }
 }

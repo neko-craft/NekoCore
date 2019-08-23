@@ -3,11 +3,16 @@ package net.nekocraft.nekocore;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {
@@ -48,9 +53,10 @@ public class Main extends JavaPlugin implements Listener {
         c9.setUnderlined(true);
         c9.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://nekocraft.net"));
 
-        getServer().getPluginManager().registerEvents(new TimeToSleep(), this);
+        getServer().getPluginManager().registerEvents(new TimeToSleep(this), this);
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginCommand("show").setExecutor(new ShowItem());
+        getServer().getPluginCommand("toggle").setExecutor(new Toggle(this));
     }
 
     @EventHandler
@@ -64,5 +70,20 @@ public class Main extends JavaPlugin implements Listener {
         p.sendMessage(c8, c9);
         p.sendMessage("  §c由于服务器没有领地插件, 请不要随意拿取他人物品, 否则会直接封禁!");
         p.sendMessage("§b§m                                                      §r\n\n\n");
+    }
+
+    @EventHandler
+    public void onKill(EntityDeathEvent e) {
+        if (e.getEntityType() == EntityType.TURTLE) {
+            Player killer = e.getEntity().getKiller();
+            int count = 2;
+            if (killer != null) {
+                count += Math.round(((float) killer
+                    .getInventory()
+                    .getItemInMainHand()
+                    .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS)) / 2);
+            }
+            e.getDrops().add(new ItemStack(Material.SCUTE, count));
+        }
     }
 }
