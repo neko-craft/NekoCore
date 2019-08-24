@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 
 import java.util.Objects;
+import java.util.Random;
 
 public final class TimeToSleep implements Listener {
     private World w;
@@ -30,9 +31,9 @@ public final class TimeToSleep implements Listener {
             ? "¡ìaÂ¶Â¶" : e.getPlayer().getDisplayName()) +
             " ¡ìbº°ÄãË¯¾õ¾õÀ²! ¡ì7(¡ìf" + current + "¡ì7 / ¡ìf" + all + "¡ì7)";
         w.getPlayers().forEach(p -> p.sendMessage(str));
-        if (all > current) {
+        if (all <= current) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                w.setTime(6000);
+                w.setTime(new Random().nextInt(2000));
                 current = 0;
                 w.getPlayers().forEach(p -> p.sendActionBar("¡ìeÃşÁË, Ë¬µ½!"));
             }, 20 * 5);

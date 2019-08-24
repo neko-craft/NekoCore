@@ -3,15 +3,22 @@ package net.nekocraft.nekocore;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Material;
-import org.bukkit.Server;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -85,5 +92,62 @@ public class Main extends JavaPlugin implements Listener {
             }
             e.getDrops().add(new ItemStack(Material.SCUTE, count));
         }
+    }
+
+    @EventHandler
+    public void onJump(PlayerInteractEvent e) {
+        if (e.getAction() != Action.PHYSICAL) return;
+        Block b = e.getClickedBlock();
+        if (b != null && b.getType() == Material.FARMLAND) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onMobJump(EntityInteractEvent e) {
+        if (e.getEntityType() != EntityType.PLAYER &&
+            e.getBlock().getType() == Material.FARMLAND) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onLightingStrike(LightningStrikeEvent e) {
+        if (e.getCause() == LightningStrikeEvent.Cause.TRIDENT ||
+            e.getCause() == LightningStrikeEvent.Cause.COMMAND) return;
+        for (Entity it : e.getLightning().getNearbyEntities(5, 5, 5)) {
+            if (it.getType() == EntityType.VILLAGER) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onVillagerSpawn(EntitySpawnEvent e) {
+        if (e.getEntityType() == EntityType.VILLAGER) {
+            int i = 0;
+            Location l = e.getLocation();
+            for (Entity it : l.getNearbyEntities(48, 48, 48)) {
+                if (it.getType() == EntityType.VILLAGER) i++;
+            }
+            if (i > 50) {
+                String msg = "§c有人在 §7" + l.getBlockX() + "," + l.getBlockY() + "," +
+                    l.getBlockZ() + " §c大量繁殖村民.";
+                Bukkit.getOnlinePlayers().forEach(it -> it.sendMessage(msg));
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent e) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : e.getMessage().split(" ")) {
+            Player p = Bukkit.getPlayer(s);
+            if (p != null) {
+                sb.append("§a@").append(s).append("§7");
+                p.sendMessage("§a一位叫 §f" + e.getPlayer().getDisplayName() + " §a的小朋友@了你.");
+                p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+            } else sb.append(s);
+            sb.append(' ');
+        }
+        e.setMessage(sb.toString());
     }
 }
