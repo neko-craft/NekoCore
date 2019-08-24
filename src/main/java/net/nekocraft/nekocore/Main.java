@@ -128,9 +128,8 @@ public class Main extends JavaPlugin implements Listener {
                 if (it.getType() == EntityType.VILLAGER) i++;
             }
             if (i > 50) {
-                String msg = "§c有人在 §7" + l.getBlockX() + "," + l.getBlockY() + "," +
-                    l.getBlockZ() + " §c大量繁殖村民.";
-                Bukkit.getOnlinePlayers().forEach(it -> it.sendMessage(msg));
+               Bukkit.broadcastMessage("§c有人在 §7" + l.getBlockX() + "," + l.getBlockY() + "," +
+                   l.getBlockZ() + " §c大量繁殖村民.");
                 e.setCancelled(true);
             }
         }

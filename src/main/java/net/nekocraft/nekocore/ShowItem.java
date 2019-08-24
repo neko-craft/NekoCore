@@ -49,7 +49,7 @@ public class ShowItem implements CommandExecutor {
         TextComponent c4 = new TextComponent(" ←鼠标移到这里可以查看");
         c4.setColor(ChatColor.GRAY);
 
-        Bukkit.getOnlinePlayers().forEach(it -> it.sendMessage(c1, c2, c3, c4));
+        Bukkit.broadcast(c1, c2, c3, c4);
         return true;
     }
 
