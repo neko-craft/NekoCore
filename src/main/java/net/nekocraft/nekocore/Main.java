@@ -22,6 +22,8 @@ import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.text.DecimalFormat;
+
 public class Main extends JavaPlugin implements Listener {
     private TextComponent c1, c2, c3, c4, c5, c6, c7, c8, c9;
     @Override
@@ -60,17 +62,27 @@ public class Main extends JavaPlugin implements Listener {
         c9.setUnderlined(true);
         c9.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://nekocraft.net"));
 
-        getServer().getPluginManager().registerEvents(new TimeToSleep(this), this);
-        getServer().getPluginManager().registerEvents(this, this);
-        getServer().getPluginCommand("show").setExecutor(new ShowItem());
-        getServer().getPluginCommand("toggle").setExecutor(new Toggle(this));
+        Server s = getServer();
+        s.getPluginManager().registerEvents(new TimeToSleep(this), this);
+        s.getPluginManager().registerEvents(this, this);
+        s.getPluginCommand("show").setExecutor(new ShowItem());
+        s.getPluginCommand("toggle").setExecutor(new Toggle(this));
+
+        DecimalFormat df = new DecimalFormat("0.00");
+
+        s.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            String text = "\n§a当前 TPS: §7" + df.format(s.getTPS()[0]) +
+                "\n§b§m                                      ";
+            s.getOnlinePlayers().forEach(it -> it.setPlayerListFooter(text));
+        }, 0, 3 * 20);
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         Server s = getServer();
-        p.sendMessage("§b§m                   §r §a[§eNekoCraft§a] §b§m                  §r\n");
+        p.setPlayerListHeader("§b§m          §r §a[§eNekoCraft§a] §b§m          \n§aTelegream 群组: §7t.me/NekoCraft\n§aQQ 群: §77923309\n§r");
+        p.sendMessage("§b§m                   §r §a[§eNekoCraft§a] §b§m                  §r");
         p.sendMessage("  §a当前在线玩家: §7" + s.getOnlinePlayers().size() + "                     §a当前TPS: " + (int) s.getTPS()[0]);
         p.sendMessage(c1, c2, c3, c4, c5);
         p.sendMessage(c6, c7);

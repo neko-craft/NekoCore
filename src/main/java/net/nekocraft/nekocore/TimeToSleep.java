@@ -1,6 +1,7 @@
 package net.nekocraft.nekocore;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -52,7 +53,7 @@ public final class TimeToSleep implements Listener {
         int all = 0;
         for (Player p : w.getPlayers()) {
             if (p.getInventory().getItemInMainHand().getType() != Material.FISHING_ROD &&
-                !p.getDisplayName().startsWith("¡ì7")) all++;
+                !p.getPlayerListName().startsWith("¡ì7") && p.getGameMode() == GameMode.SURVIVAL) all++;
         }
         return (int) Math.floor((float) all / 2);
     }
