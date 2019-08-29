@@ -23,6 +23,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.text.DecimalFormat;
+import java.util.List;
+
+import static org.bukkit.Material.*;
 
 public class Main extends JavaPlugin implements Listener {
     private TextComponent c1, c2, c3, c4, c5, c6, c7, c8, c9;
@@ -93,16 +96,35 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onKill(EntityDeathEvent e) {
-        if (e.getEntityType() == EntityType.TURTLE) {
-            Player killer = e.getEntity().getKiller();
-            int count = 2;
-            if (killer != null) {
-                count += Math.round(((float) killer
-                    .getInventory()
-                    .getItemInMainHand()
-                    .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS)) / 2);
-            }
-            e.getDrops().add(new ItemStack(Material.SCUTE, count));
+        List<ItemStack> drops = e.getDrops();
+        switch (e.getEntityType()) {
+            case TURTLE:
+                Player killer = e.getEntity().getKiller();
+                int count = 2;
+                if (killer != null) {
+                    count += Math.round(((float) killer
+                        .getInventory()
+                        .getItemInMainHand()
+                        .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS)) / 2);
+                }
+                drops.add(new ItemStack(Material.SCUTE, count));
+                break;
+            case RAVAGER:
+                drops.clear();
+                drops.add(new ItemStack(Material.LEATHER, 4));
+                break;
+            case VINDICATOR:
+                drops.removeIf(it -> it.getType() == WHITE_BANNER || it.getType() == IRON_AXE);
+                break;
+            case EVOKER:
+                drops.removeIf(is -> is.getType() == WHITE_BANNER);
+                break;
+            case PILLAGER:
+                drops.removeIf(it -> it.getType() == WHITE_BANNER || it.getType() == CROSSBOW);
+                break;
+            case WITCH:
+                drops.removeIf(is -> is.getType() == POTION);
+                break;
         }
     }
 
