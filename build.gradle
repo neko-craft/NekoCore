@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.destroystokyo.paper:paper-api:1.14.4-R0.1-SNAPSHOT'
+    compileOnly 'com.destroystokyo.paper:paper-api:1.14.4-R0.1-SNAPSHOT'
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens

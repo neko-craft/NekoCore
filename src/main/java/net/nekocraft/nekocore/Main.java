@@ -18,6 +18,7 @@ import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,6 +30,10 @@ import static org.bukkit.Material.*;
 
 public class Main extends JavaPlugin implements Listener {
     private TextComponent c1, c2, c3, c4, c5, c6, c7, c8, c9;
+    private RedStoneDetection redStoneDetection = new RedStoneDetection(this);
+    Player op;
+
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void onEnable() {
         c1 = new TextComponent("  QQ 群: ");
@@ -41,7 +46,7 @@ public class Main extends JavaPlugin implements Listener {
 
         c3 = new TextComponent("      ");
 
-        c4 = new TextComponent("Telegream 群组: ");
+        c4 = new TextComponent("Telegram 群组: ");
         c4.setColor(ChatColor.GREEN);
 
         c5 = new TextComponent("@NekoCraft");
@@ -49,18 +54,18 @@ public class Main extends JavaPlugin implements Listener {
         c5.setUnderlined(true);
         c5.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://t.me/NekoCraft"));
 
-        c6 = new TextComponent("  网页地图: ");
+        c6 = new TextComponent("  用户中心 & 大地图: ");
         c6.setColor(ChatColor.GREEN);
 
-        c7 = new TextComponent("nekocraft.net/maps");
+        c7 = new TextComponent("portal.nekocraft.net");
         c7.setColor(ChatColor.GRAY);
         c7.setUnderlined(true);
-        c7.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://nekocraft.net/maps"));
+        c7.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://portal.nekocraft.net"));
 
-        c8 = new TextComponent("  服务器地址 & 用户中心: ");
+        c8 = new TextComponent("  服务器地址: ");
         c8.setColor(ChatColor.GREEN);
 
-        c9 = new TextComponent("nekocraft.net");
+        c9 = new TextComponent("n.apisium.cn");
         c9.setColor(ChatColor.GRAY);
         c9.setUnderlined(true);
         c9.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://nekocraft.net"));
@@ -70,6 +75,10 @@ public class Main extends JavaPlugin implements Listener {
         s.getPluginManager().registerEvents(this, this);
         s.getPluginCommand("show").setExecutor(new ShowItem());
         s.getPluginCommand("toggle").setExecutor(new Toggle(this));
+        s.getPluginCommand("redstonedetect").setExecutor((sender, c, l, a) -> {
+            redStoneDetection.toggle();
+            return true;
+        });
 
         DecimalFormat df = new DecimalFormat("0.00");
 
@@ -92,6 +101,15 @@ public class Main extends JavaPlugin implements Listener {
         p.sendMessage(c8, c9);
         p.sendMessage("  §c由于服务器没有领地插件, 请不要随意拿取他人物品, 否则会直接封禁!");
         p.sendMessage("§b§m                                                      §r\n\n\n");
+        if (p.getName().equals("ShirasawaSama")) op = p;
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        if (e.getPlayer().getName().equals("ShirasawaSama")) {
+            redStoneDetection.stop();
+            op = null;
+        }
     }
 
     @EventHandler
