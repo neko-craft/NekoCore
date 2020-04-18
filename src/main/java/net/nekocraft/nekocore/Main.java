@@ -6,9 +6,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -31,6 +29,8 @@ import static org.bukkit.Material.*;
 public class Main extends JavaPlugin implements Listener {
     private TextComponent c1, c2, c3, c4, c5, c6, c7, c8, c9;
     private RedStoneDetection redStoneDetection = new RedStoneDetection(this);
+    private int i = 0;
+    private Thread thread;
     Player op;
 
     @SuppressWarnings("ConstantConditions")
@@ -62,7 +62,7 @@ public class Main extends JavaPlugin implements Listener {
         c7.setUnderlined(true);
         c7.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://portal.nekocraft.net"));
 
-        c8 = new TextComponent("  服务器地址: ");
+        c8 = new TextComponent("  服务器地址 & 官网: ");
         c8.setColor(ChatColor.GREEN);
 
         c9 = new TextComponent("n.apisium.cn");
@@ -71,8 +71,11 @@ public class Main extends JavaPlugin implements Listener {
         c9.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://nekocraft.net"));
 
         Server s = getServer();
+        AntiExplode antiExplode = new AntiExplode();
+        s.getPluginManager().registerEvents(antiExplode, this);
         s.getPluginManager().registerEvents(new TimeToSleep(this), this);
         s.getPluginManager().registerEvents(this, this);
+        s.getPluginCommand("explode").setExecutor(antiExplode);
         s.getPluginCommand("show").setExecutor(new ShowItem());
         s.getPluginCommand("toggle").setExecutor(new Toggle(this));
         s.getPluginCommand("redstonedetect").setExecutor((sender, c, l, a) -> {
@@ -82,11 +85,47 @@ public class Main extends JavaPlugin implements Listener {
 
         DecimalFormat df = new DecimalFormat("0.00");
 
-        s.getScheduler().runTaskTimerAsynchronously(this, () -> {
-            String text = "\n§a当前 TPS: §7" + df.format(s.getTPS()[0]) +
-                "\n§b§m                                      ";
-            s.getOnlinePlayers().forEach(it -> it.setPlayerListFooter(text));
-        }, 0, 3 * 20);
+        thread = new Thread(() -> {
+            try {
+                while (true) {
+                    double tps = s.getTPS()[0];
+                    if (tps < 8) i++;
+                    else i = 0;
+                    if (i > 20) {
+                        getServer().broadcastMessage("§c服务器 TPS 低, 将在五秒后自动重启!");
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        getServer().shutdown();
+                        return;
+                    }
+                    s.getOnlinePlayers().forEach(it -> it.setPlayerListFooter("\n§a当前 TPS: §7" + df.format(tps) +
+                        "\n§b§m                                      "));
+                    Thread.sleep(2000);
+                }
+            } catch (InterruptedException ignored) { }
+        });
+
+        thread.start();
+        s.getScheduler().runTaskTimerAsynchronously(this, () -> getServer().getWorlds().forEach(it -> {
+            Chunk[] ch = it.getLoadedChunks();
+            for (Chunk c : ch) if (c.getEntities().length > 500) {
+                getServer().getScheduler().runTask(this, () -> {
+                    Entity[] es = c.getEntities();
+                    for (Entity e : es) if (e instanceof Item || e instanceof FallingBlock) e.remove();
+                    getServer().broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
+                        (c.getX() << 16) + ", " + (c.getZ() << 16) + ") §c有一大堆实体, 已被清除.");
+                });
+            }
+        }), 0, 200);
+    }
+
+    @Override
+    public void onDisable() {
+        thread.interrupt();
+        thread = null;
     }
 
     @EventHandler

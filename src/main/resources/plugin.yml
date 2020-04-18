@@ -12,6 +12,9 @@ commands:
   toggle:
     description: Toggle gamemode.
     usage: /toggle
+  explode:
+    description: Toggle explode.
+    usage: /explode
   redstonedetect:
     aliases: rsd
     description: Detect high frequency redstone signal.

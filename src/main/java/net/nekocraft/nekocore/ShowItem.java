@@ -23,6 +23,10 @@ public class ShowItem implements CommandExecutor {
             s.sendMessage("§c你不是玩家.");
             return true;
         }
+        if (!s.hasPermission("nekocore.show")) {
+            s.sendMessage("§c你没有执行当前指令的权限.");
+            return true;
+        }
         Player p = (Player) s;
         String name = p.getDisplayName();
         ItemStack i = p.getInventory().getItemInMainHand();
