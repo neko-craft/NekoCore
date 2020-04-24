@@ -15,6 +15,9 @@ commands:
   explode:
     description: Toggle explode.
     usage: /explode
+  acceptrule:
+    description: Accept the server rules.
+    usage: /acceptrule
   redstonedetect:
     aliases: rsd
     description: Detect high frequency redstone signal.

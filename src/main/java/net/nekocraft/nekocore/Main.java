@@ -13,24 +13,29 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.text.DecimalFormat;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.bukkit.Material.*;
 
 public class Main extends JavaPlugin implements Listener {
-    private TextComponent c1, c2, c3, c4, c5, c6, c7, c8, c9;
+    private TextComponent c1, c2, c3, c4, c5, c6, c7, c8, c9, c20;
     private RedStoneDetection redStoneDetection = new RedStoneDetection(this);
     private int i = 0;
     private Thread thread;
+    private HashSet<Player> notAccepts = new HashSet<>();
+    private File acceptsFile = new File(getDataFolder(), "accepts.txt");
+    private String accepts = "";
     Player op;
 
     @SuppressWarnings("ConstantConditions")
@@ -68,7 +73,19 @@ public class Main extends JavaPlugin implements Listener {
         c9 = new TextComponent("n.apisium.cn");
         c9.setColor(ChatColor.GRAY);
         c9.setUnderlined(true);
-        c9.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://nekocraft.net"));
+        c9.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://n.apisium.cn"));
+
+        c20 = new TextComponent("http://portal.nekocraft.net/about");
+        c20.setColor(ChatColor.GREEN);
+        c20.setUnderlined(true);
+        c20.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "http://portal.nekocraft.net/about"));
+
+        try {
+            if (acceptsFile.exists()) accepts = new String(Files.readAllBytes(acceptsFile.toPath()));
+            else if (!acceptsFile.createNewFile()) throw new IOException("Failed to create new file");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Server s = getServer();
         AntiExplode antiExplode = new AntiExplode();
@@ -80,6 +97,24 @@ public class Main extends JavaPlugin implements Listener {
         s.getPluginCommand("toggle").setExecutor(new Toggle(this));
         s.getPluginCommand("redstonedetect").setExecutor((sender, c, l, a) -> {
             redStoneDetection.toggle();
+            return true;
+        });
+        s.getPluginCommand("acceptrule").setExecutor((sender, c, l, a) -> {
+            if (sender instanceof Player) {
+                Player p = (Player) sender;
+                String uuid = p.getUniqueId().toString();
+                if (!accepts.contains(uuid)) {
+                    notAccepts.remove(p);
+                    String text = "," + uuid;
+                    accepts += text;
+                    try {
+                        FileWriter writer = new FileWriter(acceptsFile, true);
+                        writer.write(text);
+                        writer.close();
+                    } catch (IOException e) { e.printStackTrace(); }
+                    p.sendMessage("§a感谢您接受了服务器的规定, §e同时也希望您能一直遵守规定!");
+                }
+            }
             return true;
         });
 
@@ -101,6 +136,10 @@ public class Main extends JavaPlugin implements Listener {
                         getServer().shutdown();
                         return;
                     }
+                    if (!notAccepts.isEmpty()) notAccepts.forEach(it -> {
+                        it.sendMessage("§e请点击下方链接打开服务器规定, 并仔细阅读以获取解除移动限制的方法:");
+                        it.sendMessage(c20);
+                    });
                     s.getOnlinePlayers().forEach(it -> it.setPlayerListFooter("\n§a当前 TPS: §7" + df.format(tps) +
                         "\n§b§m                                      "));
                     Thread.sleep(2000);
@@ -114,9 +153,10 @@ public class Main extends JavaPlugin implements Listener {
             for (Chunk c : ch) if (c.getEntities().length > 500) {
                 getServer().getScheduler().runTask(this, () -> {
                     Entity[] es = c.getEntities();
-                    for (Entity e : es) if (e instanceof Item || e instanceof FallingBlock) e.remove();
-                    getServer().broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
-                        (c.getX() << 16) + ", " + (c.getZ() << 16) + ") §c有一大堆实体, 已被清除.");
+                    for (Entity e : es) if (e instanceof Item || (e instanceof FallingBlock && !(e instanceof TNTPrimed)))
+                        e.remove();
+                    if (c.getEntities().length < 200) getServer().broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
+                        (c.getX() << 4) + ", " + (c.getZ() << 4) + ") §c有一大堆实体, 已被清除.");
                 });
             }
         }), 0, 200);
@@ -124,6 +164,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        notAccepts.clear();
         thread.interrupt();
         thread = null;
     }
@@ -141,6 +182,8 @@ public class Main extends JavaPlugin implements Listener {
         p.sendMessage("  §c由于服务器没有领地插件, 请不要随意拿取他人物品, 否则会直接封禁!");
         p.sendMessage("§b§m                                                      §r\n\n\n");
         if (p.getName().equals("ShirasawaSama")) op = p;
+
+        if (!accepts.contains(p.getUniqueId().toString())) notAccepts.add(p);
     }
 
     @EventHandler
@@ -149,6 +192,7 @@ public class Main extends JavaPlugin implements Listener {
             redStoneDetection.stop();
             op = null;
         }
+        notAccepts.remove(e.getPlayer());
     }
 
     @EventHandler
@@ -239,5 +283,10 @@ public class Main extends JavaPlugin implements Listener {
             sb.append(' ');
         }
         e.setMessage(sb.toString());
+    }
+
+    @EventHandler
+    public void onPlayMove(PlayerMoveEvent e) {
+        if (notAccepts.contains(e.getPlayer())) e.setCancelled(true);
     }
 }
