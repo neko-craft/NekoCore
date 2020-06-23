@@ -15,19 +15,17 @@ import java.io.FileWriter;
 import java.util.Map;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "unchecked"})
-public class Toggle implements CommandExecutor {
-    private File db;
+final class Toggle implements CommandExecutor {
+    private final File db;
     Toggle(Main plugin) {
         db = new File(plugin.getDataFolder(), "toggle");
         db.mkdirs();
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public boolean onCommand(CommandSender s, Command c, String l, String[] a) {
-        if (!(s instanceof Player)) {
-            s.sendMessage("¡ìcÄã²»ÊÇÍæ¼Ò.");
-            return true;
-        }
+        if (!(s instanceof Player)) return false;
         Player p = (Player) s;
         File file = new File(db, p.getUniqueId().toString() + ".json");
         switch (p.getGameMode()) {

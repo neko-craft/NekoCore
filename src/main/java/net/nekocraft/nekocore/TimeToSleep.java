@@ -13,14 +13,22 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import java.util.Objects;
 import java.util.Random;
 
-public final class TimeToSleep implements Listener {
-    private World w;
+final class TimeToSleep implements Listener {
+    private final World w;
     private int current = 0;
-    private Main plugin;
+    private final Main plugin;
 
     TimeToSleep(Main plugin) {
         this.plugin = plugin;
-        w = Objects.requireNonNull(Bukkit.getWorld("world"));
+        w = Objects.requireNonNull(plugin.getServer().getWorld("world"));
+    }
+
+    private String getDisplayName(String name) {
+        switch (name) {
+            case "lulu_fengling": return "Â¶Â¶";
+            case "bbleae": return "BB";
+            default: return null;
+        }
     }
 
     @EventHandler
@@ -28,16 +36,17 @@ public final class TimeToSleep implements Listener {
         if (w.isDayTime() || e.getBedEnterResult() != PlayerBedEnterEvent.BedEnterResult.OK) return;
         current++;
         int all = getAll();
-        String str = (e.getPlayer().getName().startsWith("Lulu")
-            ? "¡ìaÂ¶Â¶" : e.getPlayer().getDisplayName()) +
+        Player p = e.getPlayer();
+        String displayName = getDisplayName(p.getName().toLowerCase());
+        String str = (displayName == null ? "¡ìeÂ¶Â¶" + p.getDisplayName() : "¡ìa" + displayName) +
             " ¡ìbº°ÄãË¯¾õ¾õÀ²! ¡ì7(¡ìf" + current + "¡ì7 / ¡ìf" + all + "¡ì7)";
-        w.getPlayers().forEach(p -> p.sendMessage(str));
+        w.getPlayers().forEach(pl -> pl.sendMessage(str));
         if (all <= current) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 w.setTime(new Random().nextInt(2000));
                 current = 0;
-                w.getPlayers().forEach(p -> p.sendActionBar("¡ìeÃşÁË, Ë¬µ½!"));
-            }, 20 * 5);
+                w.getPlayers().forEach(pl -> p.sendActionBar("¡ìeÃşÁË, Ë¬µ½!"));
+            }, 20 * 8);
         }
     }
 

@@ -9,15 +9,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
-public class AntiExplode implements CommandExecutor, Listener {
+final class AntiExplode implements CommandExecutor, Listener {
     private boolean flag = false;
     @SuppressWarnings("NullableProblems")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("nekocore.explode")) {
-            sender.sendMessage("§c你没有权限使用当前命令.");
-            return true;
-        }
         if (flag) {
             flag = false;
             if (sender.isOp()) sender.sendMessage("§a当前服务器的TNT爆炸已开启!");

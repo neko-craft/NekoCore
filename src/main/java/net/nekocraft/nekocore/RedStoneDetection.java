@@ -1,53 +1,85 @@
 package net.nekocraft.nekocore;
 
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 
-class RedStoneDetection implements Listener {
-    final private Main plugin;
+final class RedStoneDetection implements Listener, CommandExecutor {
+    private final Main plugin;
     private BukkitTask task;
     private boolean started = false;
+    private Player player;
     final private HashMap<Location, Integer> redStoneRecord = new HashMap<>();
+
     RedStoneDetection(Main plugin) {
         this.plugin = plugin;
     }
-    @SuppressWarnings("WeakerAccess")
-    void start() {
-        if (started) return;
-        if (plugin.op != null) plugin.op.sendMessage("§eHigh frequency redstone detection §astarted.");
+
+    private void start() {
+        if (started || player == null) return;
         task = plugin.getServer().getScheduler().runTaskTimer(plugin, redStoneRecord::clear, 5 * 20L, 5 * 20L);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         started = true;
     }
-    void stop() {
+
+    private void stop() {
         if (!started) return;
-        if (plugin.op != null) plugin.op.sendMessage("§aHigh frequency redstone detection §cstoped.");
         BlockRedstoneEvent.getHandlerList().unregister(this);
         task.cancel();
         started = false;
-    }
-    void toggle() {
-        if (started) stop(); else start();
+        player = null;
     }
 
     @EventHandler
-    void onBlockRedStone(BlockRedstoneEvent e) {
+    public void onBlockRedStone(BlockRedstoneEvent e) {
         final Location loc = e.getBlock().getLocation();
         int i = 0;
         try {
             i = redStoneRecord.get(loc);
         } catch (Exception ignored) { }
         redStoneRecord.put(loc, i == 0 ? (i = 1) : ++i);
-        if (i >= 20) {
-            if (plugin.op != null) plugin.op.sendMessage("§cHigh frequency redstone signal detected: §eIn (" +
-                loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," +
-                loc.getBlockZ() + ")");
+        if (i >= 30) {
+            if (player != null) {
+                TextComponent c = new TextComponent("§c高频红石: §e(" +
+                        loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," +
+                        loc.getBlockZ() + ")");
+                c.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + loc.getBlockX() +
+                        " " + loc.getBlockY() + " " + loc.getBlockZ()));
+                player.sendMessage(c);
+            }
             redStoneRecord.remove(loc);
         }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        if (e.getPlayer() == player) stop();
+    }
+
+    @SuppressWarnings("NullableProblems")
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player)) return true;
+        if (started) {
+            sender.sendMessage("§e高频红石检测§c已停止");
+            if (player != null && player != sender) player.sendMessage("§e高频红石检测§c已停止");
+            stop();
+        } else {
+            player = (Player) sender;
+            sender.sendMessage("§e高频红石检测§a进行中");
+            start();
+        }
+        return true;
     }
 }

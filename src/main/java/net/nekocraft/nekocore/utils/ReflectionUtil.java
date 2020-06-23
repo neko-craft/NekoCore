@@ -1,4 +1,4 @@
-package net.nekocraft.nekocore;
+package net.nekocraft.nekocore.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -9,7 +9,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ReflectionUtil {
+public final class ReflectionUtil {
+    private ReflectionUtil() {}
 
     /*
      * The server version string to location NMS & OBC classes
@@ -19,22 +20,22 @@ public class ReflectionUtil {
     /*
      * Cache of NMS classes that we've searched for
      */
-    private static Map<String, Class<?>> loadedNMSClasses = new HashMap<String, Class<?>>();
+    private static final Map<String, Class<?>> loadedNMSClasses = new HashMap<>();
 
     /*
      * Cache of OBS classes that we've searched for
      */
-    private static Map<String, Class<?>> loadedOBCClasses = new HashMap<String, Class<?>>();
+    private static final Map<String, Class<?>> loadedOBCClasses = new HashMap<>();
 
     /*
      * Cache of methods that we've found in particular classes
      */
-    private static Map<Class<?>, Map<String, Method>> loadedMethods = new HashMap<Class<?>, Map<String, Method>>();
+    private static final Map<Class<?>, Map<String, Method>> loadedMethods = new HashMap<>();
 
     /*
      * Cache of fields that we've found in particular classes
      */
-    private static Map<Class<?>, Map<String, Field>> loadedFields = new HashMap<Class<?>, Map<String, Field>>();
+    private static final Map<Class<?>, Map<String, Field>> loadedFields = new HashMap<>();
 
     /**
      * Gets the version string for NMS & OBC class paths
@@ -114,6 +115,7 @@ public class ReflectionUtil {
             try {
                 Object nmsPlayer = getHandleMethod.invoke(player);
                 Field playerConField = getField(nmsPlayer.getClass(), "playerConnection");
+                assert playerConField != null;
                 return playerConField.get(nmsPlayer);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -148,7 +150,7 @@ public class ReflectionUtil {
      */
     public static Method getMethod(Class<?> clazz, String methodName, Class<?>... params) {
         if (!loadedMethods.containsKey(clazz)) {
-            loadedMethods.put(clazz, new HashMap<String, Method>());
+            loadedMethods.put(clazz, new HashMap<>());
         }
 
         Map<String, Method> methods = loadedMethods.get(clazz);
@@ -179,7 +181,7 @@ public class ReflectionUtil {
      */
     public static Field getField(Class<?> clazz, String fieldName) {
         if (!loadedFields.containsKey(clazz)) {
-            loadedFields.put(clazz, new HashMap<String, Field>());
+            loadedFields.put(clazz, new HashMap<>());
         }
 
         Map<String, Field> fields = loadedFields.get(clazz);

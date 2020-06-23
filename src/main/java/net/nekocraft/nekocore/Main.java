@@ -1,124 +1,70 @@
 package net.nekocraft.nekocore;
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityInteractEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.block.*;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.annotation.command.Command;
+import org.bukkit.plugin.java.annotation.permission.Permission;
+import org.bukkit.plugin.java.annotation.plugin.*;
+import org.bukkit.plugin.java.annotation.plugin.author.Author;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.text.DecimalFormat;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.bukkit.Material.*;
+import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 
-public class Main extends JavaPlugin implements Listener {
-    private TextComponent c1, c2, c3, c4, c5, c6, c7, c8, c9, c20;
-    private RedStoneDetection redStoneDetection = new RedStoneDetection(this);
+@Plugin(name = "NekoCore", version = "1.0")
+@Description("An basic plugin used in NekoCraft.")
+@Author("Shirasawa")
+@Website("https://apisium.cn")
+@ApiVersion(ApiVersion.Target.v1_13)
+@Permission(name = "neko.show", defaultValue = PermissionDefault.TRUE)
+@Permission(name = "neko.toggle", defaultValue = PermissionDefault.TRUE)
+@Permission(name = "neko.explode")
+@Permission(name = "neko.rsd")
+@Permission(name = "neko.notdeatheffect")
+@Command(name = "show", permission = "neko.show")
+@Command(name = "toggle", permission = "neko.toggle")
+@Command(name = "explode", permission = "neko.explode")
+@Command(name = "rsd", permission = "neko.rsd")
+@Command(name = "acceptrule")
+@Command(name = "denyrule")
+public final class Main extends JavaPlugin implements Listener {
     private int i = 0;
     private Thread thread;
-    private HashSet<Player> notAccepts = new HashSet<>();
-    private File acceptsFile = new File(getDataFolder(), "accepts.txt");
-    private String accepts = "";
-    Player op;
+    private static final DecimalFormat df = new DecimalFormat("0.00");
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings("BusyWait")
     @Override
     public void onEnable() {
-        c1 = new TextComponent("  QQ 群: ");
-        c1.setColor(ChatColor.GREEN);
-
-        c2 = new TextComponent("7923309");
-        c2.setColor(ChatColor.GRAY);
-        c2.setUnderlined(true);
-        c2.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://jq.qq.com/?k=5AzDYNC"));
-
-        c3 = new TextComponent("      ");
-
-        c4 = new TextComponent("Telegram 群组: ");
-        c4.setColor(ChatColor.GREEN);
-
-        c5 = new TextComponent("@NekoCraft");
-        c5.setColor(ChatColor.GRAY);
-        c5.setUnderlined(true);
-        c5.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://t.me/NekoCraft"));
-
-        c6 = new TextComponent("  用户中心 & 大地图: ");
-        c6.setColor(ChatColor.GREEN);
-
-        c7 = new TextComponent("portal.nekocraft.net");
-        c7.setColor(ChatColor.GRAY);
-        c7.setUnderlined(true);
-        c7.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://portal.nekocraft.net"));
-
-        c8 = new TextComponent("  服务器地址 & 官网: ");
-        c8.setColor(ChatColor.GREEN);
-
-        c9 = new TextComponent("n.apisium.cn");
-        c9.setColor(ChatColor.GRAY);
-        c9.setUnderlined(true);
-        c9.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://n.apisium.cn"));
-
-        c20 = new TextComponent("http://portal.nekocraft.net/about");
-        c20.setColor(ChatColor.GREEN);
-        c20.setUnderlined(true);
-        c20.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "http://portal.nekocraft.net/about"));
-
-        try {
-            if (acceptsFile.exists()) accepts = new String(Files.readAllBytes(acceptsFile.toPath()));
-            else if (!acceptsFile.createNewFile()) throw new IOException("Failed to create new file");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Server s = getServer();
-        AntiExplode antiExplode = new AntiExplode();
-        s.getPluginManager().registerEvents(antiExplode, this);
-        s.getPluginManager().registerEvents(new TimeToSleep(this), this);
-        s.getPluginManager().registerEvents(this, this);
-        s.getPluginCommand("explode").setExecutor(antiExplode);
-        s.getPluginCommand("show").setExecutor(new ShowItem());
-        s.getPluginCommand("toggle").setExecutor(new Toggle(this));
-        s.getPluginCommand("redstonedetect").setExecutor((sender, c, l, a) -> {
-            redStoneDetection.toggle();
-            return true;
-        });
-        s.getPluginCommand("acceptrule").setExecutor((sender, c, l, a) -> {
-            if (sender instanceof Player) {
-                Player p = (Player) sender;
-                String uuid = p.getUniqueId().toString();
-                if (!accepts.contains(uuid)) {
-                    notAccepts.remove(p);
-                    String text = "," + uuid;
-                    accepts += text;
-                    try {
-                        FileWriter writer = new FileWriter(acceptsFile, true);
-                        writer.write(text);
-                        writer.close();
-                    } catch (IOException e) { e.printStackTrace(); }
-                    p.sendMessage("§a感谢您接受了服务器的规定, §e同时也希望您能一直遵守规定!");
-                }
-            }
-            return true;
-        });
-
-        DecimalFormat df = new DecimalFormat("0.00");
+        final Server s = getServer();
+        final PluginManager m = s.getPluginManager();
+        final AntiExplode antiExplode = new AntiExplode();
+        final Rules rules = new Rules(this);
+        m.registerEvents(antiExplode, this);
+        m.registerEvents(rules, this);
+        m.registerEvents(new TimeToSleep(this), this);
+        m.registerEvents(this, this);
+        registerCommand("explode", antiExplode);
+        registerCommand("show", new ShowItem());
+        registerCommand("toggle", new Toggle(this));
+        registerCommand("rsd", new RedStoneDetection(this));
+        registerCommand("acceptrule", rules);
 
         thread = new Thread(() -> {
             try {
@@ -136,10 +82,6 @@ public class Main extends JavaPlugin implements Listener {
                         getServer().shutdown();
                         return;
                     }
-                    if (!notAccepts.isEmpty()) notAccepts.forEach(it -> {
-                        it.sendMessage("§e请点击下方链接打开服务器规定, 并仔细阅读以获取解除移动限制的方法:");
-                        it.sendMessage(c20);
-                    });
                     s.getOnlinePlayers().forEach(it -> it.setPlayerListFooter("\n§a当前 TPS: §7" + df.format(tps) +
                         "\n§b§m                                      "));
                     Thread.sleep(2000);
@@ -164,7 +106,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        notAccepts.clear();
+        if (thread == null) return;
         thread.interrupt();
         thread = null;
     }
@@ -173,26 +115,13 @@ public class Main extends JavaPlugin implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         Server s = getServer();
-        p.setPlayerListHeader("§b§m          §r §a[§eNekoCraft§a] §b§m          \n§aTelegream 群组: §7t.me/NekoCraft\n§aQQ 群: §77923309\n§r");
-        p.sendMessage("§b§m                   §r §a[§eNekoCraft§a] §b§m                  §r");
-        p.sendMessage("  §a当前在线玩家: §7" + s.getOnlinePlayers().size() + "                     §a当前TPS: " + (int) s.getTPS()[0]);
-        p.sendMessage(c1, c2, c3, c4, c5);
-        p.sendMessage(c6, c7);
-        p.sendMessage(c8, c9);
-        p.sendMessage("  §c由于服务器没有领地插件, 请不要随意拿取他人物品, 否则会直接封禁!");
-        p.sendMessage("§b§m                                                      §r\n\n\n");
-        if (p.getName().equals("ShirasawaSama")) op = p;
-
-        if (!accepts.contains(p.getUniqueId().toString())) notAccepts.add(p);
-    }
-
-    @EventHandler
-    public void onQuit(PlayerQuitEvent e) {
-        if (e.getPlayer().getName().equals("ShirasawaSama")) {
-            redStoneDetection.stop();
-            op = null;
-        }
-        notAccepts.remove(e.getPlayer());
+        p.setPlayerListHeader(Constants.PLAYER_HEADER);
+        p.sendMessage(Constants.JOIN_MESSAGE_HEADER);
+        p.sendMessage("  §a当前在线玩家: §7" + s.getOnlinePlayers().size() +
+                "                     §a当前TPS: " + (int) s.getTPS()[0]);
+        p.sendMessage(Constants.JOIN_MESSAGES);
+        p.sendMessage(Constants.JOIN_MESSAGE1);
+        p.sendMessage(Constants.JOIN_MESSAGE_FOOTER);
     }
 
     @EventHandler
@@ -255,18 +184,22 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onVillagerSpawn(EntitySpawnEvent e) {
-        if (e.getEntityType() == EntityType.VILLAGER) {
-            int i = 0;
-            Location l = e.getLocation();
-            for (Entity it : l.getNearbyEntities(48, 48, 48)) {
-                if (it.getType() == EntityType.VILLAGER) i++;
-            }
-            if (i > 50) {
-               Bukkit.broadcastMessage("§c有人在 §7" + l.getBlockX() + "," + l.getBlockY() + "," +
-                   l.getBlockZ() + " §c大量繁殖村民.");
+    public void onEntitySpawn(EntitySpawnEvent e) {
+        switch (e.getEntityType()) {
+            case BAT:
                 e.setCancelled(true);
-            }
+                break;
+            case VILLAGER:
+                int i = 0;
+                Location l = e.getLocation();
+                for (Entity it : l.getNearbyEntities(48, 48, 48)) {
+                    if (it.getType() == EntityType.VILLAGER) i++;
+                }
+                if (i > 50) {
+                   Bukkit.broadcastMessage("§c有人在 §7" + l.getBlockX() + "," + l.getBlockY() + "," +
+                       l.getBlockZ() + " §c大量繁殖村民.");
+                    e.setCancelled(true);
+                }
         }
     }
 
@@ -274,7 +207,7 @@ public class Main extends JavaPlugin implements Listener {
     public void onChat(AsyncPlayerChatEvent e) {
         StringBuilder sb = new StringBuilder();
         for (String s : e.getMessage().split(" ")) {
-            Player p = Bukkit.getPlayer(s);
+            Player p = getServer().getPlayerExact(s);
             if (p != null) {
                 sb.append("§a@").append(s).append("§7");
                 p.sendMessage("§a一位叫 §f" + e.getPlayer().getDisplayName() + " §a的小朋友@了你.");
@@ -286,7 +219,36 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onPlayMove(PlayerMoveEvent e) {
-        if (notAccepts.contains(e.getPlayer())) e.setCancelled(true);
+    public void onPlayerPostRespawn(PlayerPostRespawnEvent e) {
+        final Player p = e.getPlayer();
+        if (!p.hasPermission("neko.notdeatheffect")) p.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 20 * 60 * 3, 8, true, false));
+    }
+
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent e) {
+        switch (e.getEntityType()) {
+            case CREEPER:
+            case FIREBALL:
+            case SMALL_FIREBALL:
+            case DRAGON_FIREBALL:
+            case ENDER_DRAGON:
+            case WITHER_SKULL:
+                e.blockList().clear();
+        }
+    }
+
+    @EventHandler
+    public void onDamageByEntity(EntityDamageByEntityEvent e) {
+        if (e.getDamager().getType() == EntityType.CREEPER && !(e.getEntity() instanceof Monster)) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onDamageByEntity(BlockIgniteEvent e) {
+        if (e.getCause() == BlockIgniteEvent.IgniteCause.SPREAD) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onDamageByEntity(BlockBurnEvent e) {
+        e.setCancelled(true);
     }
 }
