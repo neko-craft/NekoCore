@@ -12,7 +12,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.MapMeta;
@@ -62,8 +61,7 @@ final class Rules implements Listener, CommandExecutor {
             else {
                 final PlayerInventory i = p.getInventory();
                 final ItemStack is = i.getItemInMainHand();
-                final List<String> lore = is.getLore();
-                if (lore != null && lore.size() == 1 && lore.get(0).equals(ITEM_NAME)) i.remove(is);
+                if (is.getItemMeta().getDisplayName().equals(ITEM_NAME)) i.remove(is);
                 p.sendMessage("§c你已经同意遵守了服务器规定!");
             }
             return true;
@@ -87,6 +85,7 @@ final class Rules implements Listener, CommandExecutor {
         meta.setLocationName("二维码");
         meta.setUnbreakable(true);
         meta.setLore(Lists.newArrayList(ITEM_NAME));
+        is.setItemMeta(meta);
         p.getInventory().setItemInMainHand(is);
     }
 
@@ -97,7 +96,7 @@ final class Rules implements Listener, CommandExecutor {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
-        if (notAccepts.contains(e.getPlayer())) e.setCancelled(true);
+        if (notAccepts.contains(e.getPlayer()) && e.getFrom().distance(e.getTo()) > 0.0001) e.setCancelled(true);
     }
     @EventHandler
     public void onDrop(PlayerDropItemEvent e) {
@@ -131,7 +130,7 @@ final class Rules implements Listener, CommandExecutor {
                 writer.write(text);
                 writer.close();
             } catch (IOException e) { e.printStackTrace(); }
-            p.sendMessage("§a感谢您接受了服务器的规定, §e同时也希望您能一直遵守规定!");
+            p.sendMessage("§a感谢您接受了服务器的规定, 同时也希望您能一直遵守规定!");
             Bukkit.broadcastMessage("§b欢迎新玩家 §7" + p.getDisplayName() + " §b加入了服务器!");
         }
         return true;

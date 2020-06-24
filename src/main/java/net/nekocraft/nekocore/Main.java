@@ -1,6 +1,7 @@
 package net.nekocraft.nekocore;
 
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
+import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -49,9 +50,10 @@ public final class Main extends JavaPlugin implements Listener {
     private Thread thread;
     private static final DecimalFormat df = new DecimalFormat("0.00");
 
-    @SuppressWarnings("BusyWait")
+    @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored"})
     @Override
     public void onEnable() {
+        if (!getDataFolder().exists()) getDataFolder().mkdir();
         final Server s = getServer();
         final PluginManager m = s.getPluginManager();
         final AntiExplode antiExplode = new AntiExplode();
@@ -112,7 +114,13 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        e.setQuitMessage("¡ìc- " + Utils.getDisplayName(e.getPlayer()));
+    }
+
+    @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+        e.setJoinMessage("¡ìa+ " + Utils.getDisplayName(e.getPlayer()));
         Player p = e.getPlayer();
         Server s = getServer();
         p.setPlayerListHeader(Constants.PLAYER_HEADER);
@@ -205,6 +213,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
+        e.setFormat("%1$s¡ì7: %2$s");
         StringBuilder sb = new StringBuilder();
         for (String s : e.getMessage().split(" ")) {
             Player p = getServer().getPlayerExact(s);

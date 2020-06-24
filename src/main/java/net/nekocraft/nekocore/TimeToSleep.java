@@ -1,5 +1,6 @@
 package net.nekocraft.nekocore;
 
+import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -23,22 +24,13 @@ final class TimeToSleep implements Listener {
         w = Objects.requireNonNull(plugin.getServer().getWorld("world"));
     }
 
-    private String getDisplayName(String name) {
-        switch (name) {
-            case "lulu_fengling": return "Â¶Â¶";
-            case "bbleae": return "BB";
-            default: return null;
-        }
-    }
-
     @EventHandler
     public void onSleep(PlayerBedEnterEvent e) {
         if (w.isDayTime() || e.getBedEnterResult() != PlayerBedEnterEvent.BedEnterResult.OK) return;
         current++;
         int all = getAll();
-        Player p = e.getPlayer();
-        String displayName = getDisplayName(p.getName().toLowerCase());
-        String str = (displayName == null ? "¡ìeÂ¶Â¶" + p.getDisplayName() : "¡ìa" + displayName) +
+        final Player p = e.getPlayer();
+        final String str = Utils.getDisplayName(p) +
             " ¡ìbº°ÄãË¯¾õ¾õÀ²! ¡ì7(¡ìf" + current + "¡ì7 / ¡ìf" + all + "¡ì7)";
         w.getPlayers().forEach(pl -> pl.sendMessage(str));
         if (all <= current) {
