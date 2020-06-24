@@ -37,6 +37,7 @@ public final class Utils {
         assert cmd != null;
         cmd.setUsage(Constants.WRONG_USAGE);
         cmd.setPermissionMessage(Constants.NO_PERMISSION);
+        cmd.setDescription(Constants.COMMAND_DESCRIPTION);
         cmd.setExecutor(e);
     }
 

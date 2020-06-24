@@ -3,12 +3,11 @@ package net.nekocraft.nekocore;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.entity.Player;
-
-import javax.annotation.Nullable;
+import java.util.regex.Pattern;
 
 public final class Constants {
     private Constants() {}
+    public static final String COMMAND_DESCRIPTION = "A NekoCraft provided command.";
     public static final String WRONG_USAGE = "§c错误的命令用法!";
     public static final String NO_PERMISSION = "§c你没有权限来执行这个指令!";
 
@@ -20,6 +19,15 @@ public final class Constants {
     public static final TextComponent[] JOIN_MESSAGES = new TextComponent[9];
 
     public static final TextComponent[] RULES = new TextComponent[6];
+
+    public static final Pattern[] DANGER_COMMANDS = {
+            Pattern.compile("kill @e *$"),
+            Pattern.compile("kill @e\\[(?!type=)"),
+            Pattern.compile("tp @e *$"),
+            Pattern.compile("tp @e\\[(?!type=)"),
+            Pattern.compile("teleport @e *$"),
+            Pattern.compile("teleport @e\\[(?!type=)")
+    };
 
     static {
         (JOIN_MESSAGES[0] = new TextComponent("  QQ 群: ")).setColor(ChatColor.GREEN);

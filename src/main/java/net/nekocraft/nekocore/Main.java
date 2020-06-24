@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionDefault;
@@ -25,6 +26,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.bukkit.Material.*;
 import static net.nekocraft.nekocore.utils.Utils.registerCommand;
@@ -35,12 +37,10 @@ import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 @Website("https://apisium.cn")
 @ApiVersion(ApiVersion.Target.v1_13)
 @Permission(name = "neko.show", defaultValue = PermissionDefault.TRUE)
-@Permission(name = "neko.toggle", defaultValue = PermissionDefault.TRUE)
 @Permission(name = "neko.explode")
 @Permission(name = "neko.rsd")
 @Permission(name = "neko.notdeatheffect")
 @Command(name = "show", permission = "neko.show")
-@Command(name = "toggle", permission = "neko.toggle")
 @Command(name = "explode", permission = "neko.explode")
 @Command(name = "rsd", permission = "neko.rsd")
 @Command(name = "acceptrule")
@@ -64,7 +64,6 @@ public final class Main extends JavaPlugin implements Listener {
         m.registerEvents(this, this);
         registerCommand("explode", antiExplode);
         registerCommand("show", new ShowItem());
-        registerCommand("toggle", new Toggle(this));
         registerCommand("rsd", new RedStoneDetection(this));
         registerCommand("acceptrule", rules);
 
@@ -211,7 +210,7 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
         e.setFormat("%1$s§7: %2$s");
         StringBuilder sb = new StringBuilder();
@@ -252,12 +251,31 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onDamageByEntity(BlockIgniteEvent e) {
+    public void onBlockIgnite(BlockIgniteEvent e) {
         if (e.getCause() == BlockIgniteEvent.IgniteCause.SPREAD) e.setCancelled(true);
     }
 
     @EventHandler
-    public void onDamageByEntity(BlockBurnEvent e) {
+    public void onBlockBurn(BlockBurnEvent e) {
         e.setCancelled(true);
+    }
+
+    private boolean isDangerCommand(final String cmd) {
+        for (final Pattern c : Constants.DANGER_COMMANDS) if (c.matcher(cmd).matches()) return true;
+        return false;
+    }
+    @EventHandler
+    public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
+        if (isDangerCommand(e.getMessage())) {
+            e.getPlayer().sendMessage("§c危险的指令已被拒绝执行!");
+            e.setCancelled(true);
+        }
+    }
+    @EventHandler
+    public void onServerCommand(ServerCommandEvent e) {
+        if (isDangerCommand(e.getCommand())) {
+            e.getSender().sendMessage("§c危险的指令已被拒绝执行!");
+            e.setCancelled(true);
+        }
     }
 }
