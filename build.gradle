@@ -3,8 +3,8 @@ plugins {
     id 'idea'
 }
 
-group = pluginGroup
-version = pluginVersion
+group = pluginGroup as Object
+version = pluginVersion as Object
 
 repositories {
     mavenCentral()
@@ -16,12 +16,16 @@ repositories {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
+    maven { url 'https://jitpack.io' }
+
 }
 
 dependencies {
     compileOnly 'org.spigotmc:plugin-annotations:1.2.3-SNAPSHOT'
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
-//    annotationProcessor 'org.spigotmc:plugin-annotations:1.2.3-SNAPSHOT'
+    compileOnly 'com.github.neko-craft:NekoEssentials:-SNAPSHOT'
+
+    annotationProcessor 'org.spigotmc:plugin-annotations:1.2.3-SNAPSHOT'
 }
 
 jar {
