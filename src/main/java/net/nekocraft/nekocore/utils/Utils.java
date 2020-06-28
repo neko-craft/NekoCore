@@ -7,25 +7,45 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+@SuppressWarnings("ConstantConditions")
 public final class Utils {
+    private static final Class<?> craftItemStackClazz = ReflectionUtil.getOBCClass("inventory.CraftItemStack");
+    private static final Class<?> nmsItemStackClazz = ReflectionUtil.getNMSClass("ItemStack");
+    private static final Class<?> nmsItemClazz = ReflectionUtil.getNMSClass("Item");
+    private static final Class<?> nbtTagCompoundClazz = ReflectionUtil.getNMSClass("NBTTagCompound");
+    private static final Method asNMSCopyMethod = ReflectionUtil.getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
+    private static final Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
+    private static final Method getItemNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "getItem");
+    private static final Method getNameNmsItemMethod = ReflectionUtil.getMethod(nmsItemClazz, "getName");
+    private static final Field craftItemStackHandleField = ReflectionUtil.getField(craftItemStackClazz, "handle");
+
     private Utils() {}
 
-    public static String convertItemStackToJson(ItemStack itemStack) {
-        Class<?> craftItemStackClazz = ReflectionUtil.getOBCClass("inventory.CraftItemStack");
-        Method asNMSCopyMethod = ReflectionUtil.getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
-
-        Class<?> nmsItemStackClazz = ReflectionUtil.getNMSClass("ItemStack");
-        Class<?> nbtTagCompoundClazz = ReflectionUtil.getNMSClass("NBTTagCompound");
-        Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
-
+    public static String convertItemStackToJson(final ItemStack itemStack) {
         try {
             Object nmsNbtTagCompoundObj = nbtTagCompoundClazz.newInstance();
-            assert asNMSCopyMethod != null;
-            Object nmsItemStackObj = asNMSCopyMethod.invoke(null, itemStack);
-            assert saveNmsItemStackMethod != null;
-            return saveNmsItemStackMethod.invoke(nmsItemStackObj, nmsNbtTagCompoundObj).toString();
+            return saveNmsItemStackMethod.invoke(getNMSItemStack(itemStack), nmsNbtTagCompoundObj).toString();
+        } catch (Exception t) {
+            t.printStackTrace();
+            return null;
+        }
+    }
+
+    private static Object getNMSItemStack(final ItemStack itemStack) throws InvocationTargetException, IllegalAccessException {
+        Object nms = null;
+        if (craftItemStackClazz.isInstance(itemStack)) try {
+            nms = craftItemStackHandleField.get(itemStack);
+        } catch (Exception ignored) { }
+        return nms == null ? asNMSCopyMethod.invoke(null, itemStack) : nms;
+    }
+
+    public static String getItemName(final ItemStack itemStack) {
+        try {
+            return (String) getNameNmsItemMethod.invoke(getItemNmsItemStackMethod.invoke(getNMSItemStack(itemStack)));
         } catch (Exception t) {
             t.printStackTrace();
             return null;

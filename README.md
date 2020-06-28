@@ -13,7 +13,7 @@ Just a bukkit plugin.
 ```bash
 git clone https://github.com/neko-craft/NekoCore.git
 
-gradle jar
+gradlew jar
 ```
 
 ## Author

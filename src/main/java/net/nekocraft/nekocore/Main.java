@@ -18,7 +18,6 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.annotation.command.Command;
-import org.bukkit.plugin.java.annotation.dependency.Dependency;
 import org.bukkit.plugin.java.annotation.permission.Permission;
 import org.bukkit.plugin.java.annotation.plugin.*;
 import org.bukkit.plugin.java.annotation.plugin.author.Author;
@@ -37,7 +36,6 @@ import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 @Author("Shirasawa")
 @Website("https://apisium.cn")
 @ApiVersion(ApiVersion.Target.v1_13)
-@Dependency("NekoEssentials")
 @Permission(name = "neko.show", defaultValue = PermissionDefault.TRUE)
 @Permission(name = "neko.explode")
 @Permission(name = "neko.rsd")
@@ -47,6 +45,7 @@ import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 @Command(name = "rsd", permission = "neko.rsd")
 @Command(name = "acceptrule")
 @Command(name = "denyrule")
+@SuppressWarnings("unused")
 public final class Main extends JavaPlugin implements Listener {
     private int i = 0;
     private Thread thread;

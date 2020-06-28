@@ -4,6 +4,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.TranslatableComponent;
 import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -26,14 +27,23 @@ final class ShowItem implements CommandExecutor {
             s.sendMessage("§c你的手里没有物品.");
             return true;
         }
-        BaseComponent[] hoverEventComponents = new BaseComponent[]{
+        BaseComponent[] hoverEventComponents = {
             new TextComponent(Utils.convertItemStackToJson(i))
         };
 
         ItemMeta im = i.getItemMeta();
-        String sn = "[" + (im.hasDisplayName() ? im.getDisplayName() : i.getI18NDisplayName()) + "]";
-        if (i.getAmount() > 1) sn += "x" + i.getAmount();
-        TextComponent c3 = new TextComponent(sn);
+        String itemName = Utils.getItemName(i);
+        BaseComponent c3;
+        if (im.hasDisplayName() || itemName == null) {
+            String sn = "[" + (im.hasDisplayName() ? im.getDisplayName() : i.getI18NDisplayName()) + "]";
+            if (i.getAmount() > 1) sn += "x" + i.getAmount();
+            c3 = new TextComponent(sn);
+        } else {
+            c3 = new TextComponent("[");
+            c3.addExtra(new TranslatableComponent(itemName));
+            c3.addExtra("]");
+            if (i.getAmount() > 1) c3.addExtra("x" + i.getAmount());
+        }
         c3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverEventComponents));
         c3.setColor(ChatColor.AQUA);
 
