@@ -58,22 +58,18 @@ public final class ReflectionUtil {
      * @return The class
      */
     public static Class<?> getNMSClass(String nmsClassName) {
-        if (loadedNMSClasses.containsKey(nmsClassName)) {
-            return loadedNMSClasses.get(nmsClassName);
-        }
-
-        String clazzName = "net.minecraft.server." + getVersion() + nmsClassName;
-        Class<?> clazz;
+        if (loadedNMSClasses.containsKey(nmsClassName)) return loadedNMSClasses.get(nmsClassName);
 
         try {
-            clazz = Class.forName(clazzName);
+            final Class<?> clazz = Class.forName("net.minecraft.server." +
+                    getVersion() + nmsClassName);
+            loadedNMSClasses.put(nmsClassName, clazz);
+            return clazz;
         } catch (Throwable t) {
             t.printStackTrace();
-            return loadedNMSClasses.put(nmsClassName, null);
+            loadedNMSClasses.put(nmsClassName, null);
+            return null;
         }
-
-        loadedNMSClasses.put(nmsClassName, clazz);
-        return clazz;
     }
 
     /**
@@ -82,24 +78,19 @@ public final class ReflectionUtil {
      * @param obcClassName the path to the class
      * @return the found class at the specified path
      */
-    public synchronized static Class<?> getOBCClass(String obcClassName) {
-        if (loadedOBCClasses.containsKey(obcClassName)) {
-            return loadedOBCClasses.get(obcClassName);
-        }
-
-        String clazzName = "org.bukkit.craftbukkit." + getVersion() + obcClassName;
-        Class<?> clazz;
+    public synchronized static Class<?> getOBCClass(final String obcClassName) {
+        if (loadedOBCClasses.containsKey(obcClassName)) return loadedOBCClasses.get(obcClassName);
 
         try {
-            clazz = Class.forName(clazzName);
+            final Class<?> clazz = Class.forName("org.bukkit.craftbukkit." +
+                    getVersion() + obcClassName);
+            loadedOBCClasses.put(obcClassName, clazz);
+            return clazz;
         } catch (Throwable t) {
             t.printStackTrace();
             loadedOBCClasses.put(obcClassName, null);
             return null;
         }
-
-        loadedOBCClasses.put(obcClassName, clazz);
-        return clazz;
     }
 
     /**
@@ -108,15 +99,14 @@ public final class ReflectionUtil {
      * @param player The player
      * @return The players connection
      */
+    @SuppressWarnings("unused")
     public static Object getConnection(Player player) {
-        Method getHandleMethod = getMethod(player.getClass(), "getHandle");
+        final Method getHandleMethod = getMethod(player.getClass(), "getHandle");
 
         if (getHandleMethod != null) {
             try {
                 Object nmsPlayer = getHandleMethod.invoke(player);
-                Field playerConField = getField(nmsPlayer.getClass(), "playerConnection");
-                assert playerConField != null;
-                return playerConField.get(nmsPlayer);
+                return getField(nmsPlayer.getClass(), "playerConnection").get(nmsPlayer);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -132,6 +122,7 @@ public final class ReflectionUtil {
      * @param params The parameters in the constructor
      * @return The constructor object
      */
+    @SuppressWarnings("unused")
     public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... params) {
         try {
             return clazz.getConstructor(params);
@@ -149,25 +140,22 @@ public final class ReflectionUtil {
      * @return The method with appropriate paramaters
      */
     public static Method getMethod(Class<?> clazz, String methodName, Class<?>... params) {
-        if (!loadedMethods.containsKey(clazz)) {
-            loadedMethods.put(clazz, new HashMap<>());
-        }
+        return getMethod(clazz, methodName, false, params);
+    }
+    public static Method getMethod(Class<?> clazz, String methodName, boolean declared, Class<?>... params) {
+        final Map<String, Method> methods = loadedMethods.computeIfAbsent(clazz, k -> new HashMap<>());
 
-        Map<String, Method> methods = loadedMethods.get(clazz);
-
-        if (methods.containsKey(methodName)) {
-            return methods.get(methodName);
-        }
+        if (methods.containsKey(methodName)) return methods.get(methodName);
 
         try {
-            Method method = clazz.getMethod(methodName, params);
+            final Method method = declared ? clazz.getDeclaredMethod(methodName, params)
+                    : clazz.getMethod(methodName, params);
             methods.put(methodName, method);
-            loadedMethods.put(clazz, methods);
+            if (declared) method.setAccessible(true);
             return method;
         } catch (Exception e) {
             e.printStackTrace();
             methods.put(methodName, null);
-            loadedMethods.put(clazz, methods);
             return null;
         }
     }
@@ -180,25 +168,22 @@ public final class ReflectionUtil {
      * @return The field object
      */
     public static Field getField(Class<?> clazz, String fieldName) {
-        if (!loadedFields.containsKey(clazz)) {
-            loadedFields.put(clazz, new HashMap<>());
-        }
+        return getField(clazz, fieldName, false);
+    }
+    public static Field getField(Class<?> clazz, String fieldName, boolean declared) {
+        final Map<String, Field> fields = loadedFields.computeIfAbsent(clazz, k -> new HashMap<>());
 
-        Map<String, Field> fields = loadedFields.get(clazz);
-
-        if (fields.containsKey(fieldName)) {
-            return fields.get(fieldName);
-        }
+        if (fields.containsKey(fieldName)) return fields.get(fieldName);
 
         try {
-            Field field = clazz.getField(fieldName);
+            final Field field = declared ? clazz.getDeclaredField(fieldName)
+                    : clazz.getField(fieldName);
             fields.put(fieldName, field);
-            loadedFields.put(clazz, fields);
+            if (declared) field.setAccessible(true);
             return field;
         } catch (Exception e) {
             e.printStackTrace();
             fields.put(fieldName, null);
-            loadedFields.put(clazz, fields);
             return null;
         }
     }

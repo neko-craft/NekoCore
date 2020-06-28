@@ -21,7 +21,7 @@ public final class Utils {
     private static final Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
     private static final Method getItemNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "getItem");
     private static final Method getNameNmsItemMethod = ReflectionUtil.getMethod(nmsItemClazz, "getName");
-    private static final Field craftItemStackHandleField = ReflectionUtil.getField(craftItemStackClazz, "handle");
+    private static final Field craftItemStackHandleField = ReflectionUtil.getField(craftItemStackClazz, "handle", true);
 
     private Utils() {}
 
