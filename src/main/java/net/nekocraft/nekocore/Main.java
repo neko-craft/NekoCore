@@ -3,6 +3,7 @@ package net.nekocraft.nekocore;
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
@@ -25,7 +26,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static org.bukkit.Material.*;
@@ -49,6 +52,7 @@ import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 public final class Main extends JavaPlugin implements Listener {
     private int i = 0;
     private Thread thread;
+    private static final HashMap<String, Object[]> deathRecords = new HashMap<>();
     private static final DecimalFormat df = new DecimalFormat("0.00");
 
     @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored"})
@@ -108,6 +112,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        deathRecords.clear();
         if (thread == null) return;
         thread.interrupt();
         thread = null;
@@ -227,10 +232,28 @@ public final class Main extends JavaPlugin implements Listener {
         e.setMessage(sb.toString());
     }
 
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent e) {
+        final Player p = e.getEntity();
+        if (!p.hasPermission("neko.notdeatheffect")) return;
+        deathRecords.put(p.getUniqueId().toString(), new Object[] { p.getExhaustion(), p.getSaturation(), p.getFoodLevel() });
+    }
+
     @EventHandler
     public void onPlayerPostRespawn(PlayerPostRespawnEvent e) {
         final Player p = e.getPlayer();
-        if (!p.hasPermission("neko.notdeatheffect")) p.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 20 * 60 * 3, 8, true, false));
+        if (!p.hasPermission("neko.notdeatheffect")) return;
+        final String id = p.getUniqueId().toString();
+        final Object[] obj = deathRecords.get(id);
+        if (obj != null) {
+            p.setExhaustion((float) obj[0]);
+            p.setSaturation((float) obj[1]);
+            p.setFoodLevel((int) obj[2]);
+            deathRecords.remove(id);
+        }
+        p.setHealth(Objects.requireNonNull(p.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getDefaultValue() / 2);
+        p.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 20 * 30, 1, true, false));
     }
 
     @EventHandler
@@ -265,6 +288,7 @@ public final class Main extends JavaPlugin implements Listener {
         for (final Pattern c : Constants.DANGER_COMMANDS) if (c.matcher(cmd).matches()) return true;
         return false;
     }
+
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
         if (isDangerCommand(e.getMessage())) {
