@@ -75,7 +75,7 @@ public final class Main extends JavaPlugin implements Listener {
         thread = new Thread(() -> {
             try {
                 while (true) {
-                    double tps = s.getTPS()[0];
+                    final double tps = s.getTPS()[0];
                     if (tps < 8) i++;
                     else i = 0;
                     if (i > 20) {
@@ -97,11 +97,11 @@ public final class Main extends JavaPlugin implements Listener {
 
         thread.start();
         s.getScheduler().runTaskTimerAsynchronously(this, () -> getServer().getWorlds().forEach(it -> {
-            Chunk[] ch = it.getLoadedChunks();
-            for (Chunk c : ch) if (c.getEntities().length > 500) {
+            final Chunk[] ch = it.getLoadedChunks();
+            for (final Chunk c : ch) if (c.getEntities().length > 500) {
                 getServer().getScheduler().runTask(this, () -> {
-                    Entity[] es = c.getEntities();
-                    for (Entity e : es) if (e instanceof Item || (e instanceof FallingBlock && !(e instanceof TNTPrimed)))
+                    final Entity[] es = c.getEntities();
+                    for (final Entity e : es) if (e instanceof Item || (e instanceof FallingBlock && !(e instanceof TNTPrimed)))
                         e.remove();
                     if (c.getEntities().length < 200) getServer().broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
                         (c.getX() << 4) + ", " + (c.getZ() << 4) + ") §c有一大堆实体, 已被清除.");
@@ -119,15 +119,15 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent e) {
+    public void onQuit(final PlayerQuitEvent e) {
         e.setQuitMessage("§c- " + Utils.getDisplayName(e.getPlayer()));
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         e.setJoinMessage("§a+ " + Utils.getDisplayName(e.getPlayer()));
-        Player p = e.getPlayer();
-        Server s = getServer();
+        final Player p = e.getPlayer();
+        final Server s = getServer();
         p.setPlayerListHeader(Constants.PLAYER_HEADER);
         p.sendMessage(Constants.JOIN_MESSAGE_HEADER);
         p.sendMessage("  §a当前在线玩家: §7" + s.getOnlinePlayers().size() +
@@ -138,11 +138,11 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onKill(EntityDeathEvent e) {
-        List<ItemStack> drops = e.getDrops();
+    public void onKill(final EntityDeathEvent e) {
+        final List<ItemStack> drops = e.getDrops();
         switch (e.getEntityType()) {
             case TURTLE:
-                Player killer = e.getEntity().getKiller();
+                final Player killer = e.getEntity().getKiller();
                 int count = 2;
                 if (killer != null) {
                     count += Math.round(((float) killer
@@ -172,23 +172,23 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onJump(PlayerInteractEvent e) {
+    public void onJump(final PlayerInteractEvent e) {
         if (e.getAction() != Action.PHYSICAL) return;
-        Block b = e.getClickedBlock();
+        final Block b = e.getClickedBlock();
         if (b != null && b.getType() == Material.FARMLAND) e.setCancelled(true);
     }
 
     @EventHandler
-    public void onMobJump(EntityInteractEvent e) {
+    public void onMobJump(final EntityInteractEvent e) {
         if (e.getEntityType() != EntityType.PLAYER &&
             e.getBlock().getType() == Material.FARMLAND) e.setCancelled(true);
     }
 
     @EventHandler
-    public void onLightingStrike(LightningStrikeEvent e) {
+    public void onLightingStrike(final LightningStrikeEvent e) {
         if (e.getCause() == LightningStrikeEvent.Cause.TRIDENT ||
             e.getCause() == LightningStrikeEvent.Cause.COMMAND) return;
-        for (Entity it : e.getLightning().getNearbyEntities(5, 5, 5)) {
+        for (final Entity it : e.getLightning().getNearbyEntities(5, 5, 5)) {
             if (it.getType() == EntityType.VILLAGER) {
                 e.setCancelled(true);
                 return;
@@ -197,15 +197,15 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onEntitySpawn(EntitySpawnEvent e) {
+    public void onEntitySpawn(final EntitySpawnEvent e) {
         switch (e.getEntityType()) {
             case BAT:
                 e.setCancelled(true);
                 break;
             case VILLAGER:
                 int i = 0;
-                Location l = e.getLocation();
-                for (Entity it : l.getNearbyEntities(48, 48, 48)) {
+                final Location l = e.getLocation();
+                for (final Entity it : l.getNearbyEntities(48, 48, 48)) {
                     if (it.getType() == EntityType.VILLAGER) i++;
                 }
                 if (i > 50) {
@@ -217,11 +217,11 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onChat(AsyncPlayerChatEvent e) {
+    public void onChat(final AsyncPlayerChatEvent e) {
         e.setFormat("%1$s§7: %2$s");
-        StringBuilder sb = new StringBuilder();
-        for (String s : e.getMessage().split(" ")) {
-            Player p = getServer().getPlayerExact(s);
+        final StringBuilder sb = new StringBuilder();
+        for (final String s : e.getMessage().split(" ")) {
+            final Player p = getServer().getPlayerExact(s);
             if (p != null) {
                 sb.append("§a@").append(s).append("§7");
                 p.sendMessage("§a一位叫 §f" + e.getPlayer().getDisplayName() + " §a的小朋友@了你.");
@@ -234,14 +234,14 @@ public final class Main extends JavaPlugin implements Listener {
 
 
     @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent e) {
+    public void onPlayerDeath(final PlayerDeathEvent e) {
         final Player p = e.getEntity();
         if (!p.hasPermission("neko.notdeatheffect")) return;
         deathRecords.put(p.getUniqueId().toString(), new Object[] { p.getExhaustion(), p.getSaturation(), p.getFoodLevel() });
     }
 
     @EventHandler
-    public void onPlayerPostRespawn(PlayerPostRespawnEvent e) {
+    public void onPlayerPostRespawn(final PlayerPostRespawnEvent e) {
         final Player p = e.getPlayer();
         if (!p.hasPermission("neko.notdeatheffect")) return;
         final String id = p.getUniqueId().toString();
@@ -257,7 +257,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onEntityExplode(EntityExplodeEvent e) {
+    public void onEntityExplode(final EntityExplodeEvent e) {
         switch (e.getEntityType()) {
             case CREEPER:
             case FIREBALL:
@@ -270,17 +270,21 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onDamageByEntity(EntityDamageByEntityEvent e) {
+    public void onDamageByEntity(final EntityDamageByEntityEvent e) {
         if (e.getDamager().getType() == EntityType.CREEPER && !(e.getEntity() instanceof Monster)) e.setCancelled(true);
     }
 
     @EventHandler
-    public void onBlockIgnite(BlockIgniteEvent e) {
-        if (e.getCause() == BlockIgniteEvent.IgniteCause.SPREAD) e.setCancelled(true);
+    public void onBlockIgnite(final BlockIgniteEvent e) {
+        switch (e.getCause()) {
+            case SPREAD:
+            case LAVA:
+                e.setCancelled(true);
+        }
     }
 
     @EventHandler
-    public void onBlockBurn(BlockBurnEvent e) {
+    public void onBlockBurn(final BlockBurnEvent e) {
         e.setCancelled(true);
     }
 
@@ -290,14 +294,14 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
+    public void onPlayerCommand(final PlayerCommandPreprocessEvent e) {
         if (isDangerCommand(e.getMessage())) {
             e.getPlayer().sendMessage("§c危险的指令已被拒绝执行!");
             e.setCancelled(true);
         }
     }
     @EventHandler
-    public void onServerCommand(ServerCommandEvent e) {
+    public void onServerCommand(final ServerCommandEvent e) {
         if (isDangerCommand(e.getCommand())) {
             e.getSender().sendMessage("§c危险的指令已被拒绝执行!");
             e.setCancelled(true);
