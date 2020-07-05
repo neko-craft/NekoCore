@@ -42,7 +42,7 @@ final class RedStoneDetection implements Listener, CommandExecutor {
     }
 
     @EventHandler
-    public void onBlockRedStone(BlockRedstoneEvent e) {
+    public void onBlockRedStone(final BlockRedstoneEvent e) {
         final Location loc = e.getBlock().getLocation();
         int i = 0;
         try {
@@ -51,7 +51,7 @@ final class RedStoneDetection implements Listener, CommandExecutor {
         redStoneRecord.put(loc, i == 0 ? (i = 1) : ++i);
         if (i >= 30) {
             if (player != null) {
-                TextComponent c = new TextComponent("§c高频红石: §e(" +
+                final TextComponent c = new TextComponent("§c高频红石: §e(" +
                         loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," +
                         loc.getBlockZ() + ")");
                 c.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + loc.getBlockX() +
@@ -63,13 +63,13 @@ final class RedStoneDetection implements Listener, CommandExecutor {
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent e) {
+    public void onQuit(final PlayerQuitEvent e) {
         if (e.getPlayer() == player) stop();
     }
 
     @SuppressWarnings("NullableProblems")
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (!(sender instanceof Player)) return true;
         if (started) {
             sender.sendMessage("§e高频红石检测§c已停止");

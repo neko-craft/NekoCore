@@ -44,7 +44,7 @@ public final class ReflectionUtil {
      */
     public static String getVersion() {
         if (versionString == null) {
-            String name = Bukkit.getServer().getClass().getPackage().getName();
+            final String name = Bukkit.getServer().getClass().getPackage().getName();
             versionString = name.substring(name.lastIndexOf('.') + 1) + ".";
         }
 
@@ -57,7 +57,7 @@ public final class ReflectionUtil {
      * @param nmsClassName The name of the class
      * @return The class
      */
-    public static Class<?> getNMSClass(String nmsClassName) {
+    public static Class<?> getNMSClass(final String nmsClassName) {
         if (loadedNMSClasses.containsKey(nmsClassName)) return loadedNMSClasses.get(nmsClassName);
 
         try {
@@ -100,7 +100,7 @@ public final class ReflectionUtil {
      * @return The players connection
      */
     @SuppressWarnings("unused")
-    public static Object getConnection(Player player) {
+    public static Object getConnection(final Player player) {
         final Method getHandleMethod = getMethod(player.getClass(), "getHandle");
 
         if (getHandleMethod != null) {
@@ -123,7 +123,7 @@ public final class ReflectionUtil {
      * @return The constructor object
      */
     @SuppressWarnings("unused")
-    public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... params) {
+    public static Constructor<?> getConstructor(final Class<?> clazz, final Class<?>... params) {
         try {
             return clazz.getConstructor(params);
         } catch (NoSuchMethodException e) {
@@ -139,10 +139,10 @@ public final class ReflectionUtil {
      * @param params     Any parameters that the method has
      * @return The method with appropriate paramaters
      */
-    public static Method getMethod(Class<?> clazz, String methodName, Class<?>... params) {
+    public static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>... params) {
         return getMethod(clazz, methodName, false, params);
     }
-    public static Method getMethod(Class<?> clazz, String methodName, boolean declared, Class<?>... params) {
+    public static Method getMethod(final Class<?> clazz, final String methodName, final boolean declared, final Class<?>... params) {
         final Map<String, Method> methods = loadedMethods.computeIfAbsent(clazz, k -> new HashMap<>());
 
         if (methods.containsKey(methodName)) return methods.get(methodName);
@@ -167,10 +167,10 @@ public final class ReflectionUtil {
      * @param fieldName The name of the field
      * @return The field object
      */
-    public static Field getField(Class<?> clazz, String fieldName) {
+    public static Field getField(final Class<?> clazz, final String fieldName) {
         return getField(clazz, fieldName, false);
     }
-    public static Field getField(Class<?> clazz, String fieldName, boolean declared) {
+    public static Field getField(final Class<?> clazz, final String fieldName, final boolean declared) {
         final Map<String, Field> fields = loadedFields.computeIfAbsent(clazz, k -> new HashMap<>());
 
         if (fields.containsKey(fieldName)) return fields.get(fieldName);

@@ -27,7 +27,7 @@ public final class Utils {
 
     public static String convertItemStackToJson(final ItemStack itemStack) {
         try {
-            Object nmsNbtTagCompoundObj = nbtTagCompoundClazz.newInstance();
+            final Object nmsNbtTagCompoundObj = nbtTagCompoundClazz.newInstance();
             return saveNmsItemStackMethod.invoke(getNMSItemStack(itemStack), nmsNbtTagCompoundObj).toString();
         } catch (Exception t) {
             t.printStackTrace();
@@ -52,7 +52,7 @@ public final class Utils {
         }
     }
 
-    public static void registerCommand(String name, CommandExecutor e) {
+    public static void registerCommand(final String name, final CommandExecutor e) {
         final PluginCommand cmd = Bukkit.getPluginCommand(name);
         assert cmd != null;
         cmd.setUsage(Constants.WRONG_USAGE);

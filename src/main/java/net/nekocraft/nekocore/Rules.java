@@ -26,7 +26,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 
 final class Rules implements Listener, CommandExecutor {
@@ -44,7 +43,7 @@ final class Rules implements Listener, CommandExecutor {
         map.setLocked(true);
     }
 
-    public Rules(Main main) {
+    public Rules(final Main main) {
         acceptsFile = new File(main.getDataFolder(), "accepts.txt");
 
         try {
@@ -61,7 +60,10 @@ final class Rules implements Listener, CommandExecutor {
             else {
                 final PlayerInventory i = p.getInventory();
                 final ItemStack is = i.getItemInMainHand();
-                if (is.getItemMeta().getDisplayName().equals(ITEM_NAME)) i.remove(is);
+                if (is.getItemMeta().getDisplayName().equals(ITEM_NAME)) {
+                    i.remove(is);
+                    p.updateInventory();
+                }
                 p.sendMessage("§c你已经同意遵守了服务器规定!");
             }
             return true;

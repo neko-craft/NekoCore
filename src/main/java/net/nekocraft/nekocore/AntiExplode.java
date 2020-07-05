@@ -13,7 +13,7 @@ final class AntiExplode implements CommandExecutor, Listener {
     private boolean flag = false;
     @SuppressWarnings("NullableProblems")
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (flag) {
             flag = false;
             if (sender.isOp()) sender.sendMessage("§a当前服务器的TNT爆炸已开启!");
@@ -27,7 +27,7 @@ final class AntiExplode implements CommandExecutor, Listener {
     }
 
     @EventHandler
-    public void onEntityExplode(EntityExplodeEvent e) {
+    public void onEntityExplode(final EntityExplodeEvent e) {
         if (flag && (e.getEntityType() == EntityType.PRIMED_TNT || e.getEntityType() == EntityType.MINECART_TNT))
             e.blockList().clear();
     }

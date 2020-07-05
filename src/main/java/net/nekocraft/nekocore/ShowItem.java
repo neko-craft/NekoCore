@@ -16,24 +16,23 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 final class ShowItem implements CommandExecutor {
+    private final static TextComponent TEXT_C = new TextComponent(" 向你展示了一个物品: ");
+    static { TEXT_C.setColor(ChatColor.YELLOW); }
     @SuppressWarnings("NullableProblems")
     @Override
-    public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
+    public boolean onCommand(final CommandSender s, final Command command, final String label, final String[] args) {
         if (!(s instanceof Player)) return false;
-        Player p = (Player) s;
-        String name = p.getDisplayName();
-        ItemStack i = p.getInventory().getItemInMainHand();
+       final Player p = (Player) s;
+        final String name = p.getDisplayName();
+        final ItemStack i = p.getInventory().getItemInMainHand();
         if (i.getType() == Material.AIR) {
             s.sendMessage("§c你的手里没有物品.");
             return true;
         }
-        BaseComponent[] hoverEventComponents = {
-            new TextComponent(Utils.convertItemStackToJson(i))
-        };
 
-        ItemMeta im = i.getItemMeta();
-        String itemName = Utils.getItemName(i);
-        BaseComponent c3;
+        final ItemMeta im = i.getItemMeta();
+        final String itemName = Utils.getItemName(i);
+        final BaseComponent c3;
         if (im.hasDisplayName() || itemName == null) {
             String sn = "[" + (im.hasDisplayName() ? im.getDisplayName() : i.getI18NDisplayName()) + "]";
             if (i.getAmount() > 1) sn += "x" + i.getAmount();
@@ -44,18 +43,12 @@ final class ShowItem implements CommandExecutor {
             c3.addExtra("]");
             if (i.getAmount() > 1) c3.addExtra("x" + i.getAmount());
         }
-        c3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverEventComponents));
+        c3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new TextComponent[] {
+                new TextComponent(Utils.convertItemStackToJson(i))
+        }));
         c3.setColor(ChatColor.AQUA);
 
-        TextComponent c1 = new TextComponent(name);
-
-        TextComponent c2 = new TextComponent(" 向你展示了一个物品: ");
-        c2.setColor(ChatColor.YELLOW);
-
-        TextComponent c4 = new TextComponent(" ←鼠标移到这里可以查看");
-        c4.setColor(ChatColor.GRAY);
-
-        Bukkit.broadcast(c1, c2, c3, c4);
+        Bukkit.broadcast(new TextComponent(name), TEXT_C, c3);
         return true;
     }
 }
