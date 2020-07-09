@@ -3,6 +3,7 @@ package net.nekocraft.nekocore;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+
 import java.util.regex.Pattern;
 
 public final class Constants {
@@ -11,7 +12,7 @@ public final class Constants {
     public static final String WRONG_USAGE = "§c错误的命令用法!";
     public static final String NO_PERMISSION = "§c你没有权限来执行这个指令!";
 
-    public static final String PLAYER_HEADER = "§b§m          §r §a[§eNekoCraft§a] §b§m          \n§aTelegream 群组: §7t.me/NekoCraft\n§aQQ 群: §77923309\n§r";
+    public static final String PLAYER_HEADER = "§b§m          §r §a[§eNekoCraft§a] §b§m          \n§aTelegram 群组: §7t.me/NekoCraft\n§aQQ 群: §77923309\n§r";
 
     public static final String JOIN_MESSAGE_HEADER = "§b§m                       §r §a[§eNekoCraft§a] §b§m                      §r";
     public static final String JOIN_MESSAGE1 = "  §c由于服务器没有领地插件, 请不要随意拿取他人物品, 否则会直接封禁!";
@@ -65,7 +66,7 @@ public final class Constants {
         c = RULES[1] = new TextComponent("[这里]");
         c.setColor(ChatColor.BLUE);
         c.setUnderlined(true);
-        c.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "http://user.n.apisium.cn/about"));
+        c.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://user.n.apisium.cn/#/about"));
 
         RULES[2] = new TextComponent("  §e来阅读服务器规定\n  §7点击确认后则默认您已阅读并遵守服务器规定!\n       ");
 
