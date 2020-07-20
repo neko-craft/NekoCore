@@ -9,7 +9,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
@@ -20,7 +22,10 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.annotation.command.Command;
 import org.bukkit.plugin.java.annotation.permission.Permission;
-import org.bukkit.plugin.java.annotation.plugin.*;
+import org.bukkit.plugin.java.annotation.plugin.ApiVersion;
+import org.bukkit.plugin.java.annotation.plugin.Description;
+import org.bukkit.plugin.java.annotation.plugin.Plugin;
+import org.bukkit.plugin.java.annotation.plugin.Website;
 import org.bukkit.plugin.java.annotation.plugin.author.Author;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -29,10 +34,11 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.regex.Pattern;
 
-import static org.bukkit.Material.*;
 import static net.nekocraft.nekocore.utils.Utils.registerCommand;
+import static org.bukkit.Material.*;
 
 @Plugin(name = "NekoCore", version = "1.0")
 @Description("An basic plugin used in NekoCraft.")
@@ -54,6 +60,7 @@ public final class Main extends JavaPlugin implements Listener {
     private Thread thread;
     private static final HashMap<String, Object[]> deathRecords = new HashMap<>();
     private static final DecimalFormat df = new DecimalFormat("0.00");
+    private static final Random RANDOM = new Random();
 
     @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored"})
     @Override
@@ -141,17 +148,26 @@ public final class Main extends JavaPlugin implements Listener {
     public void onKill(final EntityDeathEvent e) {
         final List<ItemStack> drops = e.getDrops();
         switch (e.getEntityType()) {
-            case TURTLE:
+            case ZOMBIE:{
+                final Player killer = e.getEntity().getKiller();
+                if (killer != null) drops.add(new ItemStack(Material.SAND, RANDOM.nextInt(killer
+                    .getInventory()
+                    .getItemInMainHand()
+                    .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS))));
+                break;
+            }
+            case TURTLE: {
                 final Player killer = e.getEntity().getKiller();
                 int count = 2;
                 if (killer != null) {
-                    count += Math.round(((float) killer
+                    count += RANDOM.nextInt(Math.round(((float) killer
                         .getInventory()
                         .getItemInMainHand()
-                        .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS)) / 2);
+                        .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS)) / 2));
                 }
                 drops.add(new ItemStack(Material.SCUTE, count));
                 break;
+            }
             case RAVAGER:
                 drops.clear();
                 drops.add(new ItemStack(Material.LEATHER, 4));

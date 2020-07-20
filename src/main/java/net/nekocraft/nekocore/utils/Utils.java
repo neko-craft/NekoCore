@@ -15,12 +15,9 @@ import java.lang.reflect.Method;
 public final class Utils {
     private static final Class<?> craftItemStackClazz = ReflectionUtil.getOBCClass("inventory.CraftItemStack");
     private static final Class<?> nmsItemStackClazz = ReflectionUtil.getNMSClass("ItemStack");
-    private static final Class<?> nmsItemClazz = ReflectionUtil.getNMSClass("Item");
     private static final Class<?> nbtTagCompoundClazz = ReflectionUtil.getNMSClass("NBTTagCompound");
     private static final Method asNMSCopyMethod = ReflectionUtil.getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
     private static final Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
-    private static final Method getItemNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "getItem");
-    private static final Method getNameNmsItemMethod = ReflectionUtil.getMethod(nmsItemClazz, "getName");
     private static final Field craftItemStackHandleField = ReflectionUtil.getField(craftItemStackClazz, "handle", true);
 
     private Utils() {}
@@ -41,15 +38,6 @@ public final class Utils {
             nms = craftItemStackHandleField.get(itemStack);
         } catch (Exception ignored) { }
         return nms == null ? asNMSCopyMethod.invoke(null, itemStack) : nms;
-    }
-
-    public static String getItemName(final ItemStack itemStack) {
-        try {
-            return (String) getNameNmsItemMethod.invoke(getItemNmsItemStackMethod.invoke(getNMSItemStack(itemStack)));
-        } catch (Exception t) {
-            t.printStackTrace();
-            return null;
-        }
     }
 
     public static void registerCommand(final String name, final CommandExecutor e) {

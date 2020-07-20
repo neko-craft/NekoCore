@@ -17,8 +17,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 final class ShowItem implements CommandExecutor {
     private final static TextComponent TEXT_C = new TextComponent(" 向你展示了一个物品: ");
-    static { TEXT_C.setColor(ChatColor.YELLOW); }
-    @SuppressWarnings("NullableProblems")
+    static { TEXT_C.setColor(ChatColor.GRAY); }
+
+    @SuppressWarnings({ "NullableProblems", "deprecation" })
     @Override
     public boolean onCommand(final CommandSender s, final Command command, final String label, final String[] args) {
         if (!(s instanceof Player)) return false;
@@ -31,9 +32,10 @@ final class ShowItem implements CommandExecutor {
         }
 
         final ItemMeta im = i.getItemMeta();
-        final String itemName = Utils.getItemName(i);
+        final String itemName = (i.getType().isItem() ? "item." : "block.") + i.getType().getKey()
+            .toString().replace(':', '.');
         final BaseComponent c3;
-        if (im.hasDisplayName() || itemName == null) {
+        if (im.hasDisplayName()) {
             String sn = "[" + (im.hasDisplayName() ? im.getDisplayName() : i.getI18NDisplayName()) + "]";
             if (i.getAmount() > 1) sn += "x" + i.getAmount();
             c3 = new TextComponent(sn);
