@@ -3,6 +3,7 @@ package net.nekocraft.nekocore;
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -31,6 +32,7 @@ import java.util.Objects;
 final class Rules implements Listener, CommandExecutor {
     private static final String ITEM_NAME = "§e服务器规则二维码";
     private static final Render render = new Render();
+    private final Location spawn;
     private final MapView map = Bukkit.createMap(Objects.requireNonNull(Bukkit.getWorld("world")));
 
     private final HashSet<Player> notAccepts = new HashSet<>();
@@ -43,7 +45,9 @@ final class Rules implements Listener, CommandExecutor {
         map.setLocked(true);
     }
 
+    @SuppressWarnings("ConstantConditions")
     public Rules(final Main main) {
+        spawn = main.getServer().getWorld("world").getSpawnLocation();
         acceptsFile = new File(main.getDataFolder(), "accepts.txt");
 
         try {
@@ -98,7 +102,7 @@ final class Rules implements Listener, CommandExecutor {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
-        if (notAccepts.contains(e.getPlayer()) && e.getFrom().distance(e.getTo()) > 0.0001) e.setCancelled(true);
+        if (notAccepts.contains(e.getPlayer()) && spawn.distance(e.getTo()) > 10) e.setCancelled(true);
     }
     @EventHandler
     public void onDrop(PlayerDropItemEvent e) {

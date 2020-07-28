@@ -9,7 +9,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.entity.*;
@@ -38,7 +37,6 @@ import java.util.Random;
 import java.util.regex.Pattern;
 
 import static net.nekocraft.nekocore.utils.Utils.registerCommand;
-import static org.bukkit.Material.*;
 
 @Plugin(name = "NekoCore", version = "1.0")
 @Description("An basic plugin used in NekoCraft.")
@@ -95,8 +93,9 @@ public final class Main extends JavaPlugin implements Listener {
                         getServer().shutdown();
                         return;
                     }
-                    s.getOnlinePlayers().forEach(it -> it.setPlayerListFooter("\n¡ìaµ±Ç° TPS: ¡ì7" + df.format(tps) +
-                        "\n¡ìb¡ìm                                      "));
+                    final String footer = "\n¡ìaMSPT: ¡ì7" + df.format(s.getTickTimes()[0] / 1000000.0) +
+                        "  ¡ìaTPS: ¡ì7" + df.format(tps) + "\n¡ìb¡ìm                                      ";
+                    s.getOnlinePlayers().forEach(it -> it.setPlayerListFooter(footer));
                     Thread.sleep(2000);
                 }
             } catch (InterruptedException ignored) { }
@@ -173,25 +172,32 @@ public final class Main extends JavaPlugin implements Listener {
                 drops.add(new ItemStack(Material.LEATHER, 4));
                 break;
             case VINDICATOR:
-                drops.removeIf(it -> it.getType() == WHITE_BANNER || it.getType() == IRON_AXE);
+                drops.removeIf(it -> it.getType() == Material.WHITE_BANNER || it.getType() == Material.IRON_AXE);
                 break;
             case EVOKER:
-                drops.removeIf(is -> is.getType() == WHITE_BANNER);
+                drops.removeIf(is -> is.getType() == Material.WHITE_BANNER);
                 break;
             case PILLAGER:
-                drops.removeIf(it -> it.getType() == WHITE_BANNER || it.getType() == CROSSBOW);
+                drops.removeIf(it -> it.getType() == Material.WHITE_BANNER || it.getType() == Material.CROSSBOW);
                 break;
             case WITCH:
-                drops.removeIf(is -> is.getType() == POTION);
+                drops.removeIf(is -> is.getType() == Material.POTION);
                 break;
         }
     }
 
     @EventHandler
-    public void onJump(final PlayerInteractEvent e) {
-        if (e.getAction() != Action.PHYSICAL) return;
-        final Block b = e.getClickedBlock();
-        if (b != null && b.getType() == Material.FARMLAND) e.setCancelled(true);
+    public void onPlayerInteract(final PlayerInteractEvent e) {
+        switch (e.getAction()) {
+            case PHYSICAL:
+                final Block b = e.getClickedBlock();
+                if (b != null && b.getType() == Material.FARMLAND) e.setCancelled(true);
+                break;
+            case RIGHT_CLICK_BLOCK:
+                if (e.getItem() != null && e.getClickedBlock() != null &&
+                    e.getClickedBlock().getType() == Material.SPAWNER &&
+                    e.getItem().getType().name().endsWith("_SPAWN_EGG")) e.setCancelled(true);
+        }
     }
 
     @EventHandler
