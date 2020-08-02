@@ -1,6 +1,9 @@
 package net.nekocraft.nekocore;
 
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -8,8 +11,10 @@ import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
@@ -59,6 +64,7 @@ public final class Main extends JavaPlugin implements Listener {
     private static final HashMap<String, Object[]> deathRecords = new HashMap<>();
     private static final DecimalFormat df = new DecimalFormat("0.00");
     private static final Random RANDOM = new Random();
+    private final World nether = getServer().getWorld("world_nether");
 
     @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored"})
     @Override
@@ -147,12 +153,20 @@ public final class Main extends JavaPlugin implements Listener {
     public void onKill(final EntityDeathEvent e) {
         final List<ItemStack> drops = e.getDrops();
         switch (e.getEntityType()) {
-            case ZOMBIE:{
+            case ZOMBIE: {
                 final Player killer = e.getEntity().getKiller();
                 if (killer != null) drops.add(new ItemStack(Material.SAND, RANDOM.nextInt(killer
                     .getInventory()
                     .getItemInMainHand()
-                    .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS))));
+                    .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS) + 1)));
+                break;
+            }
+            case SILVERFISH: {
+                final Player killer = e.getEntity().getKiller();
+                drops.add(new ItemStack(Material.GRAVEL, RANDOM.nextInt((killer == null ? 0 : killer
+                    .getInventory()
+                    .getItemInMainHand()
+                    .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS)) + 2)));
                 break;
             }
             case TURTLE: {
@@ -238,20 +252,29 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onChat(final AsyncPlayerChatEvent e) {
-        e.setFormat("%1$s§7: %2$s");
         final StringBuilder sb = new StringBuilder();
+        final String n = e.getPlayer().getName();
         for (final String s : e.getMessage().split(" ")) {
             final Player p = getServer().getPlayerExact(s);
             if (p != null) {
                 sb.append("§a@").append(s).append("§7");
-                p.sendMessage("§a一位叫 §f" + e.getPlayer().getDisplayName() + " §a的小朋友@了你.");
+                p.sendMessage("§a一位叫 §f" + n + " §a的小朋友@了你.");
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
             } else sb.append(s);
             sb.append(' ');
         }
-        e.setMessage(sb.toString());
+        final String value = sb.toString();
+        final TextComponent name = new TextComponent(n),
+            text = new TextComponent(": " + value);
+        name.setHoverEvent(Constants.AT);
+        name.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, n + " "));
+        text.setColor(ChatColor.GRAY);
+        text.setHoverEvent(Constants.TPA);
+        text.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, value.trim()));
+        e.getRecipients().forEach(it -> it.sendMessage(name, text));
+        e.getRecipients().clear();
     }
 
 
@@ -327,6 +350,20 @@ public final class Main extends JavaPlugin implements Listener {
         if (isDangerCommand(e.getCommand())) {
             e.getSender().sendMessage("§c危险的指令已被拒绝执行!");
             e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onBlockExplode(final BlockExplodeEvent e) {
+        final Block b = e.getBlock();
+        final Location loc = b.getLocation();
+        if (b.getWorld() == nether && b.getType().isAir() &&
+            (Math.pow(loc.getBlockX() + 36, 2) + Math.pow(loc.getBlockZ(), 2)) < 12544) {
+            e.setCancelled(true);
+            loc.getNearbyPlayers(6).forEach(it -> {
+                it.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 20 * 120, 5, true, false));
+                it.sendMessage("§c请不要在距离世界出生点7个区块以内玩爆炸物!");
+            });
         }
     }
 }

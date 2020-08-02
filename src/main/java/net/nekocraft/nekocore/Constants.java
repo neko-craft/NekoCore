@@ -1,11 +1,14 @@
 package net.nekocraft.nekocore;
 
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
 import java.util.regex.Pattern;
 
+@SuppressWarnings("deprecation")
 public final class Constants {
     private Constants() {}
     public static final String COMMAND_DESCRIPTION = "A NekoCraft provided command.";
@@ -20,6 +23,8 @@ public final class Constants {
     public static final TextComponent[] JOIN_MESSAGES = new TextComponent[9];
 
     public static final TextComponent[] RULES = new TextComponent[6];
+    public static final HoverEvent AT = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{ new TextComponent("§f点击可以直接 §a@ §f该玩家") }),
+        TPA = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{ new TextComponent("点击可以复制文本") });
 
     public static final Pattern[] DANGER_COMMANDS = {
             Pattern.compile("kill @e *$"),
