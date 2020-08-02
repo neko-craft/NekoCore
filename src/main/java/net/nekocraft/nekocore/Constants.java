@@ -57,7 +57,7 @@ public final class Constants {
         JOIN_MESSAGES[6] = c = new TextComponent("user.neko-craft.com");
         c.setColor(ChatColor.GRAY);
         c.setUnderlined(true);
-        c.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://neko-craft.com"));
+        c.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://user.neko-craft.com"));
 
         (JOIN_MESSAGES[7] = new TextComponent("\n  ·þÎñÆ÷µØÖ· & ¹ÙÍø: ")).setColor(ChatColor.GREEN);
 

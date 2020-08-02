@@ -1,6 +1,8 @@
 package net.nekocraft.nekocore;
 
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
+import com.destroystokyo.paper.profile.ProfileProperty;
+import com.google.gson.JsonParser;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -8,18 +10,22 @@ import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -35,10 +41,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static net.nekocraft.nekocore.utils.Utils.registerCommand;
@@ -64,6 +67,7 @@ public final class Main extends JavaPlugin implements Listener {
     private static final HashMap<String, Object[]> deathRecords = new HashMap<>();
     private static final DecimalFormat df = new DecimalFormat("0.00");
     private static final Random RANDOM = new Random();
+    private static final JsonParser PARSER = new JsonParser();
     private final World nether = getServer().getWorld("world_nether");
 
     @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored"})
@@ -147,6 +151,17 @@ public final class Main extends JavaPlugin implements Listener {
         p.sendMessage(Constants.JOIN_MESSAGES);
         p.sendMessage(Constants.JOIN_MESSAGE1);
         p.sendMessage(Constants.JOIN_MESSAGE_FOOTER);
+    }
+
+
+    @EventHandler
+    public void onAsyncPlayerPreLogin(final AsyncPlayerPreLoginEvent e) {
+        boolean needKick = true;
+        for (final ProfileProperty it : e.getPlayerProfile().getProperties()) if (it.getName().equals("textures")) try {
+            if (PARSER.parse(new String(Base64.getDecoder().decode(it.getValue()))).getAsJsonObject()
+                .getAsJsonObject("textures").getAsJsonObject("SKIN").has("url")) needKick = false;
+        } catch (final Exception ignored) { }
+        if (needKick) e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "§c请您先给您的游戏账户设置一个皮肤再尝试进入服务器!");
     }
 
     @EventHandler
@@ -315,6 +330,27 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onBlockBreak(final BlockBreakEvent e) {
+        if (checkTrapChest(e.getPlayer(), e.getBlock().getLocation())) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onInventoryClick(final InventoryClickEvent e) {
+        final InventoryHolder holder = e.getView().getTopInventory().getHolder();
+        if (holder instanceof Chest && e.getWhoClicked() instanceof Player) switch (e.getAction()) {
+            case PICKUP_ALL:
+            case PICKUP_ONE:
+            case PICKUP_HALF:
+            case PICKUP_SOME:
+            case HOTBAR_SWAP:
+            case SWAP_WITH_CURSOR:
+            case COLLECT_TO_CURSOR:
+            case MOVE_TO_OTHER_INVENTORY:
+                checkTrapChest((Player) e.getWhoClicked(), ((Chest) holder).getLocation());
+        }
+    }
+
+    @EventHandler
     public void onDamageByEntity(final EntityDamageByEntityEvent e) {
         if (e.getDamager().getType() == EntityType.CREEPER && !(e.getEntity() instanceof Monster)) e.setCancelled(true);
     }
@@ -365,5 +401,14 @@ public final class Main extends JavaPlugin implements Listener {
                 it.sendMessage("§c请不要在距离世界出生点7个区块以内玩爆炸物!");
             });
         }
+    }
+
+    private boolean checkTrapChest(final Player player, final Location loc) {
+        if (loc.getWorld().getName().equals("world") && loc.getBlockX() == -202 &&
+            loc.getBlockY() == 65 && loc.getBlockZ() == 219) {
+            getServer().broadcastMessage("§c玩家 §f" +
+                player.getName() + " §c正在尝试从出生点钻石箱中取出物品! §b请立即将物品放回箱子内!");
+            return true;
+        } else return false;
     }
 }
