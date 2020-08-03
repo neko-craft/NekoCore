@@ -23,7 +23,7 @@ final class ShowItem implements CommandExecutor {
     @Override
     public boolean onCommand(final CommandSender s, final Command command, final String label, final String[] args) {
         if (!(s instanceof Player)) return false;
-       final Player p = (Player) s;
+        final Player p = (Player) s;
         final String name = p.getDisplayName();
         final ItemStack i = p.getInventory().getItemInMainHand();
         if (i.getType() == Material.AIR) {

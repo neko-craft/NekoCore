@@ -58,6 +58,7 @@ import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 @Command(name = "show", permission = "neko.show")
 @Command(name = "explode", permission = "neko.explode")
 @Command(name = "rsd", permission = "neko.rsd")
+@Command(name = "welcome", aliases = "w")
 @Command(name = "acceptrule")
 @Command(name = "denyrule")
 @SuppressWarnings("unused")
@@ -86,6 +87,7 @@ public final class Main extends JavaPlugin implements Listener {
         registerCommand("show", new ShowItem());
         registerCommand("rsd", new RedStoneDetection(this));
         registerCommand("acceptrule", rules);
+        registerCommand("welcome", new Welcome());
 
         thread = new Thread(() -> {
             try {
