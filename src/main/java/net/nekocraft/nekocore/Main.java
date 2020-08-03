@@ -168,22 +168,6 @@ public final class Main extends JavaPlugin implements Listener {
     public void onKill(final EntityDeathEvent e) {
         final List<ItemStack> drops = e.getDrops();
         switch (e.getEntityType()) {
-            case ZOMBIE: {
-                final Player killer = e.getEntity().getKiller();
-                if (killer != null) drops.add(new ItemStack(Material.SAND, RANDOM.nextInt(killer
-                    .getInventory()
-                    .getItemInMainHand()
-                    .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS) + 1)));
-                break;
-            }
-            case SILVERFISH: {
-                final Player killer = e.getEntity().getKiller();
-                drops.add(new ItemStack(Material.GRAVEL, RANDOM.nextInt((killer == null ? 0 : killer
-                    .getInventory()
-                    .getItemInMainHand()
-                    .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS)) + 2)));
-                break;
-            }
             case TURTLE: {
                 final Player killer = e.getEntity().getKiller();
                 int count = 2;
