@@ -32,7 +32,7 @@ final class ShowItem implements CommandExecutor {
         }
 
         final ItemMeta im = i.getItemMeta();
-        final String itemName = (i.getType().isItem() ? "item." : "block.") + i.getType().getKey()
+        final String itemName = (i.getType().isBlock() ? "block." : "item.") + i.getType().getKey()
             .toString().replace(':', '.');
         final BaseComponent c3;
         if (im.hasDisplayName()) {
