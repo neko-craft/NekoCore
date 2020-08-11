@@ -333,7 +333,8 @@ public final class Main extends JavaPlugin implements Listener {
             case SWAP_WITH_CURSOR:
             case COLLECT_TO_CURSOR:
             case MOVE_TO_OTHER_INVENTORY:
-                checkTrapChest((Player) e.getWhoClicked(), ((Chest) holder).getLocation());
+                if (e.getClickedInventory() == e.getView().getTopInventory())
+                    checkTrapChest((Player) e.getWhoClicked(), ((Chest) holder).getLocation());
         }
     }
 
@@ -395,6 +396,7 @@ public final class Main extends JavaPlugin implements Listener {
             loc.getBlockY() == 65 && loc.getBlockZ() == 219) {
             getServer().broadcastMessage("§c玩家 §f" +
                 player.getName() + " §c正在尝试从出生点钻石箱中取出物品! §b请立即将物品放回箱子内!");
+            player.kickPlayer("§c请立即将拿取的物品放回箱子内!");
             return true;
         } else return false;
     }
