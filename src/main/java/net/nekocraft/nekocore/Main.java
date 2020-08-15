@@ -11,6 +11,7 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -59,6 +60,7 @@ import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 @Command(name = "explode", permission = "neko.explode")
 @Command(name = "rsd", permission = "neko.rsd")
 @Command(name = "welcome", aliases = "w")
+@Command(name = "bedrock", aliases = "be")
 @Command(name = "acceptrule")
 @Command(name = "denyrule")
 @SuppressWarnings("unused")
@@ -70,6 +72,7 @@ public final class Main extends JavaPlugin implements Listener {
     private static final Random RANDOM = new Random();
     private static final JsonParser PARSER = new JsonParser();
     private final World nether = getServer().getWorld("world_nether");
+    private final Set<Player> beList = Collections.newSetFromMap(new WeakHashMap<>());
 
     @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored"})
     @Override
@@ -88,6 +91,7 @@ public final class Main extends JavaPlugin implements Listener {
         registerCommand("rsd", new RedStoneDetection(this));
         registerCommand("acceptrule", rules);
         registerCommand("welcome", new Welcome());
+        registerCommand("bedrock", this);
 
         thread = new Thread(() -> {
             try {
@@ -134,6 +138,20 @@ public final class Main extends JavaPlugin implements Listener {
         if (thread == null) return;
         thread.interrupt();
         thread = null;
+    }
+
+    @SuppressWarnings("NullableProblems")
+    @Override
+    public boolean onCommand(final CommandSender sender, final org.bukkit.command.Command command, final String label, final String[] args) {
+        if (!command.getName().equalsIgnoreCase("bedrock") || !(sender instanceof Player)) return false;
+        if (beList.contains(sender)) {
+            beList.remove(sender);
+            sender.sendMessage("§a您当前已离开了 Bedrock 模式!");
+        } else {
+            beList.add((Player) sender);
+            sender.sendMessage("§a您已进入 Bedrock 模式!");
+        }
+        return true;
     }
 
     @EventHandler
@@ -267,6 +285,7 @@ public final class Main extends JavaPlugin implements Listener {
             sb.append(' ');
         }
         final String value = sb.toString();
+        final String be = n + "§7: " + value;
         final TextComponent name = new TextComponent(n),
             text = new TextComponent(": " + value);
         name.setHoverEvent(Constants.AT);
@@ -274,7 +293,10 @@ public final class Main extends JavaPlugin implements Listener {
         text.setColor(ChatColor.GRAY);
         text.setHoverEvent(Constants.TPA);
         text.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, value.trim()));
-        e.getRecipients().forEach(it -> it.sendMessage(name, text));
+        e.getRecipients().forEach(it -> {
+            if (beList.contains(it)) it.sendMessage(be);
+            else it.sendMessage(name, text);
+        });
         e.getRecipients().clear();
     }
 
