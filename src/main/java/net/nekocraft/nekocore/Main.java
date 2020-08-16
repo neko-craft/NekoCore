@@ -362,7 +362,8 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onDamageByEntity(final EntityDamageByEntityEvent e) {
-        if (e.getDamager().getType() == EntityType.CREEPER && !(e.getEntity() instanceof Monster)) e.setCancelled(true);
+        if (e.getDamager().getType() == EntityType.CREEPER && !(e.getEntity() instanceof Monster ||
+            e.getEntityType() == EntityType.PLAYER)) e.setCancelled(true);
     }
 
     @EventHandler
