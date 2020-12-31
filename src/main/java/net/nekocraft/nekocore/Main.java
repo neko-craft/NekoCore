@@ -10,6 +10,7 @@ import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
@@ -17,10 +18,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -422,5 +420,20 @@ public final class Main extends JavaPlugin implements Listener {
             player.kickPlayer("§c请立即将拿取的物品放回箱子内!");
             return true;
         } else return false;
+    }
+
+    @EventHandler
+    public void onBlockSpread(final BlockSpreadEvent e) {
+        Block block = e.getSource();
+        if (block.getType() != Material.KELP && e.getNewState().getType() != Material.KELP) return;
+        int height = 0;
+        do {
+            if (height++ >= 15) {
+                e.setCancelled(true);
+                return;
+            }
+            block = block.getRelative(BlockFace.DOWN);
+        } while (block.getType() == Material.KELP_PLANT);
+        if (height >= 2 + new Random(block.getLocation().add(0, 1, 0).toBlockKey()).nextInt(13)) e.setCancelled(true);
     }
 }
