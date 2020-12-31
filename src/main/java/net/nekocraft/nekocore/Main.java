@@ -20,6 +20,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
@@ -172,7 +173,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAsyncPlayerPreLogin(final AsyncPlayerPreLoginEvent e) {
         boolean needKick = true;
         for (final ProfileProperty it : e.getPlayerProfile().getProperties()) if (it.getName().equals("textures")) try {
@@ -217,7 +218,7 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(final PlayerInteractEvent e) {
         switch (e.getAction()) {
             case PHYSICAL:
@@ -231,13 +232,13 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onMobJump(final EntityInteractEvent e) {
         if (e.getEntityType() != EntityType.PLAYER &&
             e.getBlock().getType() == Material.FARMLAND) e.setCancelled(true);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onLightingStrike(final LightningStrikeEvent e) {
         if (e.getCause() == LightningStrikeEvent.Cause.TRIDENT ||
             e.getCause() == LightningStrikeEvent.Cause.COMMAND) return;
@@ -249,7 +250,7 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntitySpawn(final EntitySpawnEvent e) {
         switch (e.getEntityType()) {
             case BAT:
@@ -335,9 +336,14 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(final BlockBreakEvent e) {
         if (checkTrapChest(e.getPlayer(), e.getBlock().getLocation())) e.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockBreak(final HangingBreakByEntityEvent e) {
+        if (e.getRemover() != null && e.getRemover().getType() == EntityType.CREEPER) e.setCancelled(true);
     }
 
     @EventHandler
@@ -358,13 +364,13 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onDamageByEntity(final EntityDamageByEntityEvent e) {
         if (e.getDamager().getType() == EntityType.CREEPER && !(e.getEntity() instanceof Monster ||
             e.getEntityType() == EntityType.PLAYER)) e.setCancelled(true);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockIgnite(final BlockIgniteEvent e) {
         switch (e.getCause()) {
             case SPREAD:
@@ -373,7 +379,7 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockBurn(final BlockBurnEvent e) {
         e.setCancelled(true);
     }
@@ -383,14 +389,14 @@ public final class Main extends JavaPlugin implements Listener {
         return false;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerCommand(final PlayerCommandPreprocessEvent e) {
         if (isDangerCommand(e.getMessage())) {
             e.getPlayer().sendMessage("§c危险的指令已被拒绝执行!");
             e.setCancelled(true);
         }
     }
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onServerCommand(final ServerCommandEvent e) {
         if (isDangerCommand(e.getCommand())) {
             e.getSender().sendMessage("§c危险的指令已被拒绝执行!");
@@ -398,7 +404,7 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockExplode(final BlockExplodeEvent e) {
         final Block b = e.getBlock();
         final Location loc = b.getLocation();
@@ -422,7 +428,7 @@ public final class Main extends JavaPlugin implements Listener {
         } else return false;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockSpread(final BlockSpreadEvent e) {
         Block block = e.getSource();
         if (block.getType() != Material.KELP && e.getNewState().getType() != Material.KELP) return;
