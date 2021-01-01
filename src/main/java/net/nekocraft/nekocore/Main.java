@@ -442,4 +442,14 @@ public final class Main extends JavaPlugin implements Listener {
         } while (block.getType() == Material.KELP_PLANT);
         if (height >= 2 + new Random(block.getLocation().add(0, 1, 0).toBlockKey()).nextInt(13)) e.setCancelled(true);
     }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockPlace(final BlockPlaceEvent e) {
+        if (e.getBlock().getType() == Material.WET_SPONGE) Utils.absorbLava(e.getBlock(), null);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onSpongeAbsorb(final SpongeAbsorbEvent e) {
+        if (!e.getBlocks().isEmpty()) Utils.absorbLava(e.getBlock(), this);
+    }
 }

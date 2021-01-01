@@ -1,15 +1,19 @@
 package net.nekocraft.nekocore.utils;
 
 import net.nekocraft.nekocore.Constants;
-import org.bukkit.Bukkit;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.LinkedList;
 
 @SuppressWarnings("ConstantConditions")
 public final class Utils {
@@ -19,6 +23,7 @@ public final class Utils {
     private static final Method asNMSCopyMethod = ReflectionUtil.getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
     private static final Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
     private static final Field craftItemStackHandleField = ReflectionUtil.getField(craftItemStackClazz, "handle", true);
+    private static final BlockFace[] blockFaces = BlockFace.values();
 
     private Utils() {}
 
@@ -56,6 +61,32 @@ public final class Utils {
             case "8c33f169-44f1-4a2d-ad9b-9d6b37b363da": return "¡ìa¾õ¾õ";
             case "3de49e85-2e7c-43f9-8ff2-4cea43da4655": return "¡ìaÜ½Ü½";
             default: return "¡ìf" + p.getDisplayName();
+        }
+    }
+
+    public static void absorbLava(final Block initBlock, final Plugin plugin) {
+        final LinkedList<Object[]> queue = new LinkedList<>();
+        queue.add(new Object[] { initBlock, 0 });
+        int i = 0;
+        while (!queue.isEmpty()) {
+            Object[] pair = queue.poll();
+            Block sourceBlock = (Block) pair[0];
+            int j = (int) pair[1];
+            for (final BlockFace it : blockFaces) {
+                Block block = sourceBlock.getRelative(it);
+                if (block.getType() == Material.LAVA) {
+                    block.setType(Material.AIR);
+                    ++i;
+                    if (j < 6) queue.add(new Object[] { block, j + 1 });
+                }
+            }
+            if (i > 64) break;
+        }
+        if (i > 0) {
+            initBlock.getWorld().playEffect(initBlock.getLocation(), Effect.EXTINGUISH, null);
+            initBlock.getWorld().spawnParticle(Particle.SMOKE_LARGE, initBlock.getLocation().add(0.5, 1, 0.5), 10, 0.2, 0.5, 0.2, 0);
+            if (plugin == null) initBlock.setType(Material.CRYING_OBSIDIAN);
+            else plugin.getServer().getScheduler().runTask(plugin, () -> initBlock.setType(Material.CRYING_OBSIDIAN));
         }
     }
 }
