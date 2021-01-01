@@ -431,7 +431,17 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onBlockSpread(final BlockSpreadEvent e) {
         Block block = e.getSource();
-        if (block.getType() != Material.KELP && e.getNewState().getType() != Material.KELP) return;
+        if (block.getType() != e.getNewState().getType()) return;
+        final Material material;
+        switch (block.getType()) {
+            case KELP:
+                material = Material.KELP_PLANT;
+                break;
+            case BAMBOO:
+                material = Material.BAMBOO;
+                break;
+            default: return;
+        }
         int height = 0;
         do {
             if (height++ >= 15) {
@@ -439,7 +449,7 @@ public final class Main extends JavaPlugin implements Listener {
                 return;
             }
             block = block.getRelative(BlockFace.DOWN);
-        } while (block.getType() == Material.KELP_PLANT);
+        } while (block.getType() == material);
         if (height >= 2 + new Random(block.getLocation().add(0, 1, 0).toBlockKey()).nextInt(13)) e.setCancelled(true);
     }
 
@@ -451,5 +461,10 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onSpongeAbsorb(final SpongeAbsorbEvent e) {
         if (!e.getBlocks().isEmpty()) Utils.absorbLava(e.getBlock(), this);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onEntityChangeBlock(final EntityChangeBlockEvent e) {
+        if (e.getEntityType() == EntityType.ENDERMAN) e.setCancelled(true);
     }
 }
