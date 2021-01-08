@@ -89,4 +89,86 @@ public final class Utils {
             else plugin.getServer().getScheduler().runTask(plugin, () -> initBlock.setType(Material.CRYING_OBSIDIAN));
         }
     }
+
+    public static boolean isLeaves(final Material type) {
+        switch (type) {
+            case ACACIA_LEAVES:
+            case BIRCH_LEAVES:
+            case DARK_OAK_LEAVES:
+            case JUNGLE_LEAVES:
+            case OAK_LEAVES:
+            case SPRUCE_LEAVES:
+                return true;
+            default: return false;
+        }
+    }
+
+    public static boolean isLog(final Material type) {
+        switch (type) {
+            case ACACIA_LOG:
+            case BIRCH_LOG:
+            case DARK_OAK_LOG:
+            case JUNGLE_LOG:
+            case OAK_LOG:
+            case SPRUCE_LOG:
+                return true;
+            default: return false;
+        }
+    }
+
+    public static boolean isConductive(final Material type) {
+        switch (type) {
+            case IRON_AXE:
+            case IRON_BARS:
+            case IRON_BLOCK:
+            case IRON_BOOTS:
+            case IRON_CHESTPLATE:
+            case IRON_DOOR:
+            case IRON_HELMET:
+            case IRON_HOE:
+            case IRON_HORSE_ARMOR:
+            case IRON_INGOT:
+            case IRON_LEGGINGS:
+            case IRON_NUGGET:
+            case IRON_PICKAXE:
+            case IRON_SHOVEL:
+            case IRON_SWORD:
+            case IRON_TRAPDOOR:
+            case NETHERITE_AXE:
+            case NETHERITE_BLOCK:
+            case NETHERITE_BOOTS:
+            case NETHERITE_CHESTPLATE:
+            case NETHERITE_HELMET:
+            case NETHERITE_HOE:
+            case NETHERITE_INGOT:
+            case NETHERITE_LEGGINGS:
+            case NETHERITE_PICKAXE:
+            case NETHERITE_SCRAP:
+            case NETHERITE_SHOVEL:
+            case NETHERITE_SWORD:
+            case ANCIENT_DEBRIS:
+            case GOLD_BLOCK:
+            case GOLD_INGOT:
+            case GOLDEN_AXE:
+            case GOLDEN_BOOTS:
+            case GOLDEN_CHESTPLATE:
+            case GOLDEN_HELMET:
+            case GOLDEN_HOE:
+            case GOLDEN_HORSE_ARMOR:
+            case GOLDEN_LEGGINGS:
+            case GOLDEN_SWORD:
+            case GOLDEN_PICKAXE:
+            case GOLDEN_SHOVEL:
+            case BUCKET:
+            case FLINT_AND_STEEL:
+            case MINECART:
+            case CHAIN:
+            case CHAINMAIL_BOOTS:
+            case CHAINMAIL_CHESTPLATE:
+            case CHAINMAIL_HELMET:
+            case CHAINMAIL_LEGGINGS:
+                return true;
+            default: return false;
+        }
+    }
 }

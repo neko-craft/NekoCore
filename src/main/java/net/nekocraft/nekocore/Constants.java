@@ -5,6 +5,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.regex.Pattern;
 
@@ -33,6 +34,16 @@ public final class Constants {
             Pattern.compile("tp @e\\[(?!type=)"),
             Pattern.compile("teleport @e *$"),
             Pattern.compile("teleport @e\\[(?!type=)")
+    };
+
+    public static final PotionEffectType[] EFFECTS = new PotionEffectType[] {
+            PotionEffectType.SPEED,
+            PotionEffectType.HEALTH_BOOST,
+            PotionEffectType.INCREASE_DAMAGE,
+            PotionEffectType.JUMP,
+            PotionEffectType.REGENERATION,
+            PotionEffectType.FIRE_RESISTANCE,
+            PotionEffectType.ABSORPTION
     };
 
     static {

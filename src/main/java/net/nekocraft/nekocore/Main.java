@@ -12,6 +12,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
+import org.bukkit.block.data.type.Leaves;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
@@ -27,6 +28,7 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -71,9 +73,10 @@ public final class Main extends JavaPlugin implements Listener {
     private static final Random RANDOM = new Random();
     private static final JsonParser PARSER = new JsonParser();
     private final World nether = getServer().getWorld("world_nether");
+    private final World world = getServer().getWorld("world");
     private final Set<Player> beList = Collections.newSetFromMap(new WeakHashMap<>());
 
-    @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored"})
+    @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored", "ConstantConditions"})
     @Override
     public void onEnable() {
         if (!getDataFolder().exists()) getDataFolder().mkdir();
@@ -111,24 +114,71 @@ public final class Main extends JavaPlugin implements Listener {
                     final String footer = "\n§aMSPT: §7" + df.format(s.getTickTimes()[0] / 1000000.0) +
                         "  §aTPS: §7" + df.format(tps) + "\n§b§m                                      ";
                     s.getOnlinePlayers().forEach(it -> it.setPlayerListFooter(footer));
+                    getServer().getWorlds().forEach(it -> {
+                        final Chunk[] ch = it.getLoadedChunks();
+                        for (final Chunk c : ch) if (c.getEntities().length > 500) {
+                            getServer().getScheduler().runTask(this, () -> {
+                                final Entity[] es = c.getEntities();
+                                for (final Entity e : es) if (e instanceof Item || (e instanceof FallingBlock && !(e instanceof TNTPrimed)))
+                                    e.remove();
+                                if (c.getEntities().length < 200) getServer().broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
+                                        (c.getX() << 4) + ", " + (c.getZ() << 4) + ") §c有一大堆实体, 已被清除.");
+                            });
+                        }
+                    });
+                    if (world.isThundering()) {
+                        world.getPlayers().forEach(it -> {
+                            if (it.getGameMode() != GameMode.SURVIVAL || RANDOM.nextInt(7) != 0) return;
+                            final Location loc = it.getLocation();
+                            if (it.isInRain() && RANDOM.nextInt(2) == 0) {
+                                final PlayerInventory inv = it.getInventory();
+                                if (Utils.isConductive(inv.getItemInMainHand().getType()) ||
+                                        Utils.isConductive(inv.getItemInOffHand().getType()) ||
+                                        Utils.isConductive(inv.getBoots().getType()) ||
+                                        Utils.isConductive(inv.getChestplate().getType()) ||
+                                        Utils.isConductive(inv.getLeggings().getType()) ||
+                                        Utils.isConductive(inv.getHelmet().getType())) {
+                                    getServer().getScheduler().runTask(this, () -> world.strikeLightning(loc));
+                                    return;
+                                }
+                            }
+                            Block block = loc.toHighestLocation().getBlock();
+                            if (Utils.isLeaves(block.getType())) {
+                                final Leaves data = (Leaves) block.getBlockData();
+                                if (data.isPersistent()) return;
+                                int y = block.getY(), endY = loc.getBlockY() + 3;
+                                while (y-- > endY) {
+                                    block = block.getRelative(0, -1, 0);
+                                    final Material type = block.getType();
+                                    if (!(type == Material.AIR || Utils.isLeaves(type) || Utils.isLog(type))) return;
+                                }
+                                getServer().getScheduler().runTask(this, () -> world.strikeLightning(loc));
+                            }
+                        });
+                        world.getEntities().forEach(it -> {
+                            switch (it.getType()) {
+                                case ZOMBIE:
+                                case ZOMBIE_VILLAGER:
+                                    if (((Zombie) it).getEquipment().getItemInMainHand().getType() != Material.IRON_SHOVEL) return;
+                                    break;
+                                case DROPPED_ITEM:
+                                    if (!Utils.isConductive(((Item) it).getItemStack().getType())) return;
+                                    break;
+                                default: return;
+                            }
+                            if (!it.isInRain() || RANDOM.nextInt(14) != 0) return;
+                            final Location loc = it.getLocation();
+                            getServer().getScheduler().runTask(this, () -> world.strikeLightning(loc));
+                        });
+                    }
                     Thread.sleep(2000);
                 }
             } catch (InterruptedException ignored) { }
         });
-
+        getServer().getScheduler().runTaskTimer(this, () -> {
+            if (RANDOM.nextInt(5) > 2) world.setThundering(true);
+        }, 5000, 5000);
         thread.start();
-        s.getScheduler().runTaskTimerAsynchronously(this, () -> getServer().getWorlds().forEach(it -> {
-            final Chunk[] ch = it.getLoadedChunks();
-            for (final Chunk c : ch) if (c.getEntities().length > 500) {
-                getServer().getScheduler().runTask(this, () -> {
-                    final Entity[] es = c.getEntities();
-                    for (final Entity e : es) if (e instanceof Item || (e instanceof FallingBlock && !(e instanceof TNTPrimed)))
-                        e.remove();
-                    if (c.getEntities().length < 200) getServer().broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
-                        (c.getX() << 4) + ", " + (c.getZ() << 4) + ") §c有一大堆实体, 已被清除.");
-                });
-            }
-        }), 0, 200);
     }
 
     @Override
@@ -248,6 +298,21 @@ public final class Main extends JavaPlugin implements Listener {
                 return;
             }
         }
+        final Location loc = e.getLightning().getLocation();
+        if (loc.getWorld() != world) return;
+        final double y = loc.getY();
+        final int x = loc.getBlockX() - 5, z = loc.getBlockZ() - 5;
+        for (int i = 0; i < 10; i++) for (int j = 0; j < 10; j++) {
+            // noinspection ConstantConditions
+            final Block block = world.getHighestBlockAt(x + i, z + j);
+            final Location loc2 = block.getLocation();
+            if (loc2.getY() >= y && Utils.isConductive(block.getType())) {
+                e.getLightning().teleport(loc2.toCenterLocation());
+                final Block b2 = block.getRelative(0, -1, 0);
+                if (Utils.isLog(b2.getType())) b2.setType(Material.COAL_BLOCK);
+                return;
+            }
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -255,6 +320,12 @@ public final class Main extends JavaPlugin implements Listener {
         switch (e.getEntityType()) {
             case BAT:
                 e.setCancelled(true);
+                return;
+            case HUSK:
+            case ZOMBIE:
+            case DROWNED:
+            case ZOMBIE_VILLAGER:
+                if (RANDOM.nextBoolean()) ((Zombie) e.getEntity()).setShouldBurnInDay(false);
                 break;
             case VILLAGER:
                 int i = 0;
@@ -267,7 +338,11 @@ public final class Main extends JavaPlugin implements Listener {
                        l.getBlockZ() + " §c大量繁殖村民.");
                     e.setCancelled(true);
                 }
+                return;
         }
+        if (!(e.getEntity() instanceof Monster)) return;
+        final Monster entity = (Monster) e.getEntity();
+        while (RANDOM.nextInt(10) >= 7) entity.addPotionEffect(new PotionEffect(Constants.EFFECTS[RANDOM.nextInt(Constants.EFFECTS.length - 1)], 144000, 1));
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -299,11 +374,10 @@ public final class Main extends JavaPlugin implements Listener {
         e.getRecipients().clear();
     }
 
-
     @EventHandler
     public void onPlayerDeath(final PlayerDeathEvent e) {
         final Player p = e.getEntity();
-        if (!p.hasPermission("neko.notdeatheffect")) return;
+        if (p.hasPermission("neko.notdeatheffect")) return;
         deathRecords.put(p.getUniqueId().toString(), new Object[] { p.getExhaustion(), p.getSaturation(), p.getFoodLevel() });
     }
 
@@ -365,9 +439,22 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onEntityPickupItem(final EntityPickupItemEvent e) {
+        if (e.getEntity() instanceof Zombie) e.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onDamageByEntity(final EntityDamageByEntityEvent e) {
-        if (e.getDamager().getType() == EntityType.CREEPER && !(e.getEntity() instanceof Monster ||
-            e.getEntityType() == EntityType.PLAYER)) e.setCancelled(true);
+        switch (e.getDamager().getType()) {
+            case CREEPER:
+            case ENDER_CRYSTAL:
+            case LIGHTNING:
+            case FIREBALL:
+                break;
+            default: return;
+        }
+        if (e.getEntity() instanceof Monster || e.getEntityType() == EntityType.PLAYER) return;
+        e.setCancelled(true);
     }
 
     @EventHandler(ignoreCancelled = true)
