@@ -8,6 +8,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.*;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -26,6 +27,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -64,7 +66,7 @@ import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 @Command(name = "bedrock", aliases = "be")
 @Command(name = "acceptrule")
 @Command(name = "denyrule")
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "deprecation"})
 public final class Main extends JavaPlugin implements Listener {
     private int i = 0;
     private Thread thread;
@@ -72,9 +74,15 @@ public final class Main extends JavaPlugin implements Listener {
     private static final DecimalFormat df = new DecimalFormat("0.00");
     private static final Random RANDOM = new Random();
     private static final JsonParser PARSER = new JsonParser();
-    private final World nether = getServer().getWorld("world_nether");
-    private final World world = getServer().getWorld("world");
+    private World nether, world;
     private final Set<Player> beList = Collections.newSetFromMap(new WeakHashMap<>());
+
+    private final Advancement DEATH = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death")),
+            STRIKE = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_strike")),
+            HUNGRY = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_hungry")),
+            EXPLOSION = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_explosion")),
+            STABBED = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_stabbed")),
+            FIRST_STEP = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/first_step"));
 
     @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored", "ConstantConditions"})
     @Override
@@ -95,6 +103,10 @@ public final class Main extends JavaPlugin implements Listener {
         registerCommand("welcome", new Welcome());
         registerCommand("bedrock", this);
 
+        world = s.getWorld("world");
+        nether = s.getWorld("world_nether");
+        final Location spawn = world.getSpawnLocation();
+
         thread = new Thread(() -> {
             try {
                 while (true) {
@@ -113,15 +125,18 @@ public final class Main extends JavaPlugin implements Listener {
                     }
                     final String footer = "\n§aMSPT: §7" + df.format(s.getTickTimes()[0] / 1000000.0) +
                         "  §aTPS: §7" + df.format(tps) + "\n§b§m                                      ";
-                    s.getOnlinePlayers().forEach(it -> it.setPlayerListFooter(footer));
-                    getServer().getWorlds().forEach(it -> {
+                    s.getOnlinePlayers().forEach(it -> {
+                        it.setPlayerListFooter(footer);
+                        if (it.getLocation().distanceSquared(spawn) > 400) Utils.giveAdvancement(FIRST_STEP, it);
+                    });
+                    s.getWorlds().forEach(it -> {
                         final Chunk[] ch = it.getLoadedChunks();
                         for (final Chunk c : ch) if (c.getEntities().length > 500) {
-                            getServer().getScheduler().runTask(this, () -> {
+                            s.getScheduler().runTask(this, () -> {
                                 final Entity[] es = c.getEntities();
                                 for (final Entity e : es) if (e instanceof Item || (e instanceof FallingBlock && !(e instanceof TNTPrimed)))
                                     e.remove();
-                                if (c.getEntities().length < 200) getServer().broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
+                                if (c.getEntities().length < 200) s.broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
                                         (c.getX() << 4) + ", " + (c.getZ() << 4) + ") §c有一大堆实体, 已被清除.");
                             });
                         }
@@ -130,15 +145,15 @@ public final class Main extends JavaPlugin implements Listener {
                         world.getPlayers().forEach(it -> {
                             if (it.getGameMode() != GameMode.SURVIVAL || RANDOM.nextInt(7) != 0) return;
                             final Location loc = it.getLocation();
-                            if (it.isInRain() && RANDOM.nextInt(2) == 0) {
+                            if (it.isInRain() && RANDOM.nextInt(4) == 0) {
                                 final PlayerInventory inv = it.getInventory();
-                                if (Utils.isConductive(inv.getItemInMainHand().getType()) ||
-                                        Utils.isConductive(inv.getItemInOffHand().getType()) ||
-                                        Utils.isConductive(inv.getBoots().getType()) ||
-                                        Utils.isConductive(inv.getChestplate().getType()) ||
-                                        Utils.isConductive(inv.getLeggings().getType()) ||
-                                        Utils.isConductive(inv.getHelmet().getType())) {
-                                    getServer().getScheduler().runTask(this, () -> world.strikeLightning(loc));
+                                if (Utils.isConductive(inv.getItemInMainHand()) ||
+                                        Utils.isConductive(inv.getItemInOffHand()) ||
+                                        Utils.isConductive(inv.getBoots()) ||
+                                        Utils.isConductive(inv.getChestplate()) ||
+                                        Utils.isConductive(inv.getLeggings()) ||
+                                        Utils.isConductive(inv.getHelmet())) {
+                                    s.getScheduler().runTask(this, () -> world.strikeLightning(loc));
                                     return;
                                 }
                             }
@@ -152,20 +167,21 @@ public final class Main extends JavaPlugin implements Listener {
                                     final Material type = block.getType();
                                     if (!(type == Material.AIR || Utils.isLeaves(type) || Utils.isLog(type))) return;
                                 }
-                                getServer().getScheduler().runTask(this, () -> world.strikeLightning(loc));
+                                s.getScheduler().runTask(this, () -> world.strikeLightning(loc));
                             }
                         });
                         world.getEntities().forEach(it -> {
-                            switch (it.getType()) {
-                                case ZOMBIE:
-                                case ZOMBIE_VILLAGER:
-                                    if (((Zombie) it).getEquipment().getItemInMainHand().getType() != Material.IRON_SHOVEL) return;
-                                    break;
-                                case DROPPED_ITEM:
-                                    if (!Utils.isConductive(((Item) it).getItemStack().getType())) return;
-                                    break;
-                                default: return;
-                            }
+                            if (it.getType() == EntityType.DROPPED_ITEM) {
+                                if (!Utils.isConductive(((Item) it).getItemStack().getType())) return;
+                            } else if (it instanceof Monster) {
+                                EntityEquipment inv = ((LivingEntity) it).getEquipment();
+                                if (!(Utils.isConductive(inv.getItemInMainHand()) ||
+                                        Utils.isConductive(inv.getItemInOffHand()) ||
+                                        Utils.isConductive(inv.getBoots()) ||
+                                        Utils.isConductive(inv.getChestplate()) ||
+                                        Utils.isConductive(inv.getLeggings()) ||
+                                        Utils.isConductive(inv.getHelmet()))) return;
+                            } else return;
                             if (!it.isInRain() || RANDOM.nextInt(14) != 0) return;
                             final Location loc = it.getLocation();
                             getServer().getScheduler().runTask(this, () -> world.strikeLightning(loc));
@@ -173,7 +189,9 @@ public final class Main extends JavaPlugin implements Listener {
                     }
                     Thread.sleep(2000);
                 }
-            } catch (InterruptedException ignored) { }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         });
         getServer().getScheduler().runTaskTimer(this, () -> {
             if (RANDOM.nextInt(5) > 2) world.setThundering(true);
@@ -290,9 +308,8 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onLightingStrike(final LightningStrikeEvent e) {
-        if (e.getCause() == LightningStrikeEvent.Cause.TRIDENT ||
-            e.getCause() == LightningStrikeEvent.Cause.COMMAND) return;
-        for (final Entity it : e.getLightning().getNearbyEntities(5, 5, 5)) {
+        if (e.getCause() != LightningStrikeEvent.Cause.TRIDENT &&
+            e.getCause() != LightningStrikeEvent.Cause.COMMAND) for (final Entity it : e.getLightning().getNearbyEntities(5, 5, 5)) {
             if (it.getType() == EntityType.VILLAGER) {
                 e.setCancelled(true);
                 return;
@@ -301,9 +318,8 @@ public final class Main extends JavaPlugin implements Listener {
         final Location loc = e.getLightning().getLocation();
         if (loc.getWorld() != world) return;
         final double y = loc.getY();
-        final int x = loc.getBlockX() - 5, z = loc.getBlockZ() - 5;
-        for (int i = 0; i < 10; i++) for (int j = 0; j < 10; j++) {
-            // noinspection ConstantConditions
+        final int x = loc.getBlockX() - 16, z = loc.getBlockZ() - 16;
+        for (int i = 0; i < 32; i++) for (int j = 0; j < 32; j++) {
             final Block block = world.getHighestBlockAt(x + i, z + j);
             final Location loc2 = block.getLocation();
             if (loc2.getY() >= y && Utils.isConductive(block.getType())) {
@@ -318,6 +334,7 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onEntitySpawn(final EntitySpawnEvent e) {
         switch (e.getEntityType()) {
+            case CREEPER: return;
             case BAT:
                 e.setCancelled(true);
                 return;
@@ -342,7 +359,8 @@ public final class Main extends JavaPlugin implements Listener {
         }
         if (!(e.getEntity() instanceof Monster)) return;
         final Monster entity = (Monster) e.getEntity();
-        while (RANDOM.nextInt(10) >= 7) entity.addPotionEffect(new PotionEffect(Constants.EFFECTS[RANDOM.nextInt(Constants.EFFECTS.length - 1)], 144000, 1));
+        while (RANDOM.nextInt(10) >= 7) entity.addPotionEffect(
+                new PotionEffect(Constants.EFFECTS[RANDOM.nextInt(Constants.EFFECTS.length - 1)], 144000, RANDOM.nextBoolean() ? 1 : 2));
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -374,9 +392,34 @@ public final class Main extends JavaPlugin implements Listener {
         e.getRecipients().clear();
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerDeath(final PlayerDeathEvent e) {
         final Player p = e.getEntity();
+        Utils.giveAdvancement(DEATH, p);
+        final EntityDamageEvent dmg = p.getLastDamageCause();
+        if (dmg != null) {
+            Advancement ad = null;
+            switch (dmg.getCause()) {
+                case ENTITY_EXPLOSION:
+                case BLOCK_EXPLOSION:
+                    ad = EXPLOSION;
+                    break;
+                case STARVATION:
+                    ad = HUNGRY;
+                    break;
+                case LIGHTNING:
+                    ad = STRIKE;
+                    break;
+                default: if (dmg instanceof EntityDamageByBlockEvent) {
+                    final Block block = ((EntityDamageByBlockEvent) dmg).getDamager();
+                    if (block != null) {
+                        final Material type = block.getType();
+                        if (type == Material.CACTUS || type == Material.SWEET_BERRY_BUSH) ad = STABBED;
+                    }
+                }
+            }
+            Utils.giveAdvancement(ad, p);
+        }
         if (p.hasPermission("neko.notdeatheffect")) return;
         deathRecords.put(p.getUniqueId().toString(), new Object[] { p.getExhaustion(), p.getSaturation(), p.getFoodLevel() });
     }
@@ -384,7 +427,7 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerPostRespawn(final PlayerPostRespawnEvent e) {
         final Player p = e.getPlayer();
-        if (!p.hasPermission("neko.notdeatheffect")) return;
+        if (p.hasPermission("neko.notdeatheffect")) return;
         final String id = p.getUniqueId().toString();
         final Object[] obj = deathRecords.get(id);
         if (obj != null) {
@@ -552,6 +595,8 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityChangeBlock(final EntityChangeBlockEvent e) {
-        if (e.getEntityType() == EntityType.ENDERMAN) e.setCancelled(true);
+        if (e.getEntityType() != EntityType.ENDERMAN) return;
+        e.setCancelled(true);
+        ((Enderman) e.getEntity()).setCarriedBlock(null);
     }
 }

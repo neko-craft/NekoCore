@@ -2,6 +2,8 @@ package net.nekocraft.nekocore.utils;
 
 import net.nekocraft.nekocore.Constants;
 import org.bukkit.*;
+import org.bukkit.advancement.Advancement;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandExecutor;
@@ -90,6 +92,12 @@ public final class Utils {
         }
     }
 
+    public static void giveAdvancement(final Advancement ad, final Player p) {
+        if (ad == null) return;
+        final AdvancementProgress ap = p.getAdvancementProgress(ad);
+        if (!ap.isDone()) ap.awardCriteria("trigger");
+    }
+
     public static boolean isLeaves(final Material type) {
         switch (type) {
             case ACACIA_LEAVES:
@@ -116,6 +124,9 @@ public final class Utils {
         }
     }
 
+    public static boolean isConductive(final ItemStack item) {
+        return item != null && isConductive(item.getType());
+    }
     public static boolean isConductive(final Material type) {
         switch (type) {
             case IRON_AXE:
@@ -167,6 +178,7 @@ public final class Utils {
             case CHAINMAIL_CHESTPLATE:
             case CHAINMAIL_HELMET:
             case CHAINMAIL_LEGGINGS:
+            case HOPPER:
                 return true;
             default: return false;
         }

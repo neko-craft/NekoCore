@@ -1,10 +1,10 @@
 package net.nekocraft.nekocore;
 
 import com.google.common.collect.Lists;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import net.nekocraft.nekocore.utils.Utils;
+import org.bukkit.*;
+import org.bukkit.advancement.Advancement;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Objects;
 
+@SuppressWarnings("deprecation")
 final class Rules implements Listener, CommandExecutor {
     private static final String ITEM_NAME = "§e服务器规则二维码";
     private static final Render render = new Render();
@@ -37,6 +38,7 @@ final class Rules implements Listener, CommandExecutor {
 
     private final HashSet<Player> notAccepts = new HashSet<>();
     private final File acceptsFile;
+    private final Advancement ROOT = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/root"));
     private String accepts = "";
 
     {
@@ -62,16 +64,20 @@ final class Rules implements Listener, CommandExecutor {
             final Player p = (Player) sender;
             if (notAccepts.contains(p)) p.kickPlayer("§e[NekoCraft] §c你拒绝遵守服务器规定.");
             else {
-                final PlayerInventory i = p.getInventory();
-                final ItemStack is = i.getItemInMainHand();
-                if (is.getItemMeta().getDisplayName().equals(ITEM_NAME)) {
-                    i.remove(is);
-                    p.updateInventory();
-                }
+                removeMap(p);
                 p.sendMessage("§c你已经同意遵守了服务器规定!");
             }
             return true;
         });
+    }
+
+    private void removeMap(final Player p) {
+        final PlayerInventory i = p.getInventory();
+        final ItemStack is = i.getItemInMainHand();
+        if (is.getItemMeta().getDisplayName().equals(ITEM_NAME)) {
+            i.remove(is);
+            p.updateInventory();
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -125,8 +131,9 @@ final class Rules implements Listener, CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) return false;
-        Player p = (Player) sender;
-        String uuid = p.getUniqueId().toString();
+        final Player p = (Player) sender;
+        final String uuid = p.getUniqueId().toString();
+        removeMap(p);
         if (!accepts.contains(uuid)) {
             notAccepts.remove(p);
             String text = "," + uuid;
@@ -139,6 +146,7 @@ final class Rules implements Listener, CommandExecutor {
             p.sendMessage("§a感谢您接受了服务器的规定, 同时也希望您能一直遵守规定!");
             Bukkit.broadcastMessage("§b欢迎新玩家 §7" + p.getDisplayName() + " §b加入了服务器!");
         }
+        Utils.giveAdvancement(ROOT, p);
         return true;
     }
 
