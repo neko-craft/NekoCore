@@ -82,7 +82,11 @@ public final class Main extends JavaPlugin implements Listener {
             HUNGRY = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_hungry")),
             EXPLOSION = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_explosion")),
             STABBED = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_stabbed")),
-            FIRST_STEP = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/first_step"));
+            FIRST_STEP = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/first_step")),
+            CHAT = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/chat")),
+            QUESTION = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/chat_question")),
+            AT = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/chat_at")),
+            HOME = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/home"));
 
     @SuppressWarnings({"BusyWait", "ResultOfMethodCallIgnored", "ConstantConditions"})
     @Override
@@ -125,22 +129,26 @@ public final class Main extends JavaPlugin implements Listener {
                     }
                     final String footer = "\n§aMSPT: §7" + df.format(s.getTickTimes()[0] / 1000000.0) +
                         "  §aTPS: §7" + df.format(tps) + "\n§b§m                                      ";
+                    final ArrayList<Player> list = new ArrayList<>();
                     s.getOnlinePlayers().forEach(it -> {
                         it.setPlayerListFooter(footer);
-                        if (it.getLocation().distanceSquared(spawn) > 400) Utils.giveAdvancement(FIRST_STEP, it);
+                        if (it.getLocation().distanceSquared(spawn) > 400) list.add(it);
                     });
-                    s.getWorlds().forEach(it -> {
-                        final Chunk[] ch = it.getLoadedChunks();
-                        for (final Chunk c : ch) if (c.getEntities().length > 500) {
-                            s.getScheduler().runTask(this, () -> {
-                                final Entity[] es = c.getEntities();
-                                for (final Entity e : es) if (e instanceof Item || (e instanceof FallingBlock && !(e instanceof TNTPrimed)))
-                                    e.remove();
-                                if (c.getEntities().length < 200) s.broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
-                                        (c.getX() << 4) + ", " + (c.getZ() << 4) + ") §c有一大堆实体, 已被清除.");
-                            });
-                        }
-                    });
+                    if (!list.isEmpty()) s.getScheduler().runTask(this, () -> list.forEach(it -> Utils.giveAdvancement(FIRST_STEP, it)));
+                    try {
+                        s.getWorlds().forEach(it -> {
+                            final Chunk[] ch = it.getLoadedChunks();
+                            for (final Chunk c : ch) if (c.getEntities().length > 500) {
+                                s.getScheduler().runTask(this, () -> {
+                                    final Entity[] es = c.getEntities();
+                                    for (final Entity e : es) if (e instanceof Item || (e instanceof FallingBlock && !(e instanceof TNTPrimed)))
+                                        e.remove();
+                                    if (c.getEntities().length < 200) s.broadcastMessage("§c这个位置 §7(" + c.getWorld().getName() + ", " +
+                                            (c.getX() << 4) + ", " + (c.getZ() << 4) + ") §c有一大堆实体, 已被清除.");
+                                });
+                            }
+                        });
+                    } catch (final Exception ignored) { }
                     if (world.isThundering()) {
                         world.getPlayers().forEach(it -> {
                             if (it.getGameMode() != GameMode.SURVIVAL || RANDOM.nextInt(7) != 0) return;
@@ -367,12 +375,14 @@ public final class Main extends JavaPlugin implements Listener {
     public void onChat(final AsyncPlayerChatEvent e) {
         final StringBuilder sb = new StringBuilder();
         final String n = e.getPlayer().getName();
+        boolean isAt = false;
         for (final String s : e.getMessage().split(" ")) {
             final Player p = getServer().getPlayerExact(s);
             if (p != null) {
                 sb.append("§a@").append(s).append("§7");
                 p.sendMessage("§a一位叫 §f" + n + " §a的小朋友@了你.");
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+                isAt = true;
             } else sb.append(s);
             sb.append(' ');
         }
@@ -390,6 +400,12 @@ public final class Main extends JavaPlugin implements Listener {
             else it.sendMessage(name, text);
         });
         e.getRecipients().clear();
+        final boolean flag = isAt;
+        getServer().getScheduler().runTask(this, () -> {
+            Utils.giveAdvancement(CHAT, e.getPlayer());
+            if (flag) Utils.giveAdvancement(AT, e.getPlayer());
+            if (value.contains("\u00BF")) Utils.giveAdvancement(QUESTION, e.getPlayer());
+        });
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -524,7 +540,7 @@ public final class Main extends JavaPlugin implements Listener {
         if (isDangerCommand(e.getMessage())) {
             e.getPlayer().sendMessage("§c危险的指令已被拒绝执行!");
             e.setCancelled(true);
-        }
+        } else if (e.getMessage().startsWith("sethome") || e.getMessage().startsWith("/sethome")) Utils.giveAdvancement(HOME, e.getPlayer());
     }
     @EventHandler(ignoreCancelled = true)
     public void onServerCommand(final ServerCommandEvent e) {
