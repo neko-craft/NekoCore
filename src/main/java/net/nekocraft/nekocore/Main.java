@@ -132,7 +132,8 @@ public final class Main extends JavaPlugin implements Listener {
                     final ArrayList<Player> list = new ArrayList<>();
                     s.getOnlinePlayers().forEach(it -> {
                         it.setPlayerListFooter(footer);
-                        if (it.getLocation().distanceSquared(spawn) > 400) list.add(it);
+                        final Location loc = it.getLocation();
+                        if (loc.getWorld() == world && loc.distanceSquared(spawn) > 400) list.add(it);
                     });
                     if (!list.isEmpty()) s.getScheduler().runTask(this, () -> list.forEach(it -> Utils.giveAdvancement(FIRST_STEP, it)));
                     try {
@@ -267,10 +268,11 @@ public final class Main extends JavaPlugin implements Listener {
                 final Player killer = e.getEntity().getKiller();
                 int count = 2;
                 if (killer != null) {
-                    count += RANDOM.nextInt(Math.round(((float) killer
-                        .getInventory()
-                        .getItemInMainHand()
-                        .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS)) / 2));
+                    int bound = Math.round(((float) killer
+                            .getInventory()
+                            .getItemInMainHand()
+                            .getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS)) / 2);
+                    if (bound > 0) count += RANDOM.nextInt(bound);
                 }
                 drops.add(new ItemStack(Material.SCUTE, count));
                 break;
