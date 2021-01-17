@@ -36,9 +36,12 @@ final class ShowItem implements CommandExecutor {
             .toString().replace(':', '.');
         final BaseComponent c3;
         if (im.hasDisplayName()) {
-            String sn = "[" + (im.hasDisplayName() ? im.getDisplayName() : i.getI18NDisplayName()) + "]";
-            if (i.getAmount() > 1) sn += "x" + i.getAmount();
-            c3 = new TextComponent(sn);
+            c3 = new TextComponent("[");
+            final TextComponent t = new TextComponent(im.hasDisplayName() ? im.getDisplayName() : i.getI18NDisplayName());
+            t.setItalic(true);
+            c3.addExtra(t);
+            c3.addExtra("]");
+            if (i.getAmount() > 1) c3.addExtra("x" + i.getAmount());
         } else {
             c3 = new TextComponent("[");
             c3.addExtra(new TranslatableComponent(itemName));

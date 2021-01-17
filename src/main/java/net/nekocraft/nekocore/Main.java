@@ -152,9 +152,9 @@ public final class Main extends JavaPlugin implements Listener {
                     } catch (final Exception ignored) { }
                     if (world.isThundering()) {
                         world.getPlayers().forEach(it -> {
-                            if (it.getGameMode() != GameMode.SURVIVAL || RANDOM.nextInt(7) != 0) return;
+                            if (it.getGameMode() != GameMode.SURVIVAL || RANDOM.nextInt(14) != 0) return;
                             final Location loc = it.getLocation();
-                            if (it.isInRain() && RANDOM.nextInt(4) == 0) {
+                            if (it.isInRain() && RANDOM.nextInt(3) == 0) {
                                 final PlayerInventory inv = it.getInventory();
                                 if (Utils.isConductive(inv.getItemInMainHand()) ||
                                         Utils.isConductive(inv.getItemInOffHand()) ||
@@ -198,7 +198,7 @@ public final class Main extends JavaPlugin implements Listener {
                     }
                     Thread.sleep(2000);
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException ignored) { } catch (final Exception e) {
                 e.printStackTrace();
             }
         });
@@ -378,7 +378,12 @@ public final class Main extends JavaPlugin implements Listener {
         final StringBuilder sb = new StringBuilder();
         final String n = e.getPlayer().getName();
         boolean isAt = false;
-        for (final String s : e.getMessage().split(" ")) {
+        for (String s : e.getMessage().split(" ")) {
+            if (s.startsWith("@")) s = s.replaceAll("^@+", "");
+            if (n.equalsIgnoreCase(s)) {
+                sb.append(s).append(' ');
+                continue;
+            }
             final Player p = getServer().getPlayerExact(s);
             if (p != null) {
                 sb.append("¡ìa@").append(s).append("¡ì7");
