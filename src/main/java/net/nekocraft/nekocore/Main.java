@@ -150,9 +150,9 @@ public final class Main extends JavaPlugin implements Listener {
                             }
                         });
                     } catch (final Exception ignored) { }
-                    if (world.isThundering()) {
+                    if (world.isThundering() && world.hasStorm()) {
                         world.getPlayers().forEach(it -> {
-                            if (it.getGameMode() != GameMode.SURVIVAL || RANDOM.nextInt(14) != 0) return;
+                            if (it.getGameMode() != GameMode.SURVIVAL || RANDOM.nextInt(17) != 0) return;
                             final Location loc = it.getLocation();
                             if (it.isInRain() && RANDOM.nextInt(3) == 0) {
                                 final PlayerInventory inv = it.getInventory();
@@ -167,7 +167,7 @@ public final class Main extends JavaPlugin implements Listener {
                                 }
                             }
                             Block block = loc.toHighestLocation().getBlock();
-                            if (Utils.isLeaves(block.getType())) {
+                            if (Utils.isLeaves(block.getType()) && block.getHumidity() > 0 && block.getTemperature() > 0) {
                                 final Leaves data = (Leaves) block.getBlockData();
                                 if (data.isPersistent()) return;
                                 int y = block.getY(), endY = loc.getBlockY() + 3;
@@ -202,9 +202,6 @@ public final class Main extends JavaPlugin implements Listener {
                 e.printStackTrace();
             }
         });
-        getServer().getScheduler().runTaskTimer(this, () -> {
-            if (RANDOM.nextInt(5) > 2) world.setThundering(true);
-        }, 5000, 5000);
         thread.start();
     }
 

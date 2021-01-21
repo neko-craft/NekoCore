@@ -173,12 +173,21 @@ public final class Utils {
             case BUCKET:
             case FLINT_AND_STEEL:
             case MINECART:
+            case HOPPER_MINECART:
+            case CHEST_MINECART:
+            case FURNACE_MINECART:
+            case TNT_MINECART:
             case CHAIN:
             case CHAINMAIL_BOOTS:
             case CHAINMAIL_CHESTPLATE:
             case CHAINMAIL_HELMET:
             case CHAINMAIL_LEGGINGS:
             case HOPPER:
+            case ANVIL:
+            case CHIPPED_ANVIL:
+            case DAMAGED_ANVIL:
+            case SHEARS:
+            case CAULDRON:
                 return true;
             default: return false;
         }

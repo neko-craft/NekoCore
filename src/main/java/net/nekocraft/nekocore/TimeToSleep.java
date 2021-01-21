@@ -34,7 +34,10 @@ final class TimeToSleep implements Listener {
         w.getPlayers().forEach(pl -> pl.sendActionBar(str));
         if (all <= current) {
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (all > current) return;
                 w.setTime(new Random().nextInt(2000));
+                w.setThundering(false);
+                w.setStorm(false);
                 current = 0;
                 w.getPlayers().forEach(pl -> p.sendActionBar("¡ìeÃşÁË, Ë¬µ½!"));
             }, 20 * 8);
