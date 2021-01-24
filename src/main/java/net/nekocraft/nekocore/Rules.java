@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
-import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -144,6 +143,7 @@ final class Rules implements Listener, CommandExecutor {
                 writer.close();
             } catch (IOException e) { e.printStackTrace(); }
             p.sendMessage("§a感谢您接受了服务器的规定, 同时也希望您能一直遵守规定!");
+            p.sendMessage("§e您可以先往前走几步, 到达新人食物领取处获取生存初期物资哦.");
             Bukkit.broadcastMessage("§b欢迎新玩家 §7" + p.getDisplayName() + " §b加入了服务器!");
         }
         Utils.giveAdvancement(ROOT, p);

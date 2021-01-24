@@ -77,7 +77,7 @@ public final class Constants {
         c.setUnderlined(true);
         c.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://neko-craft.com"));
 
-        RULES[0] = new TextComponent("  §b欢迎您第一次来到 §eNekoCraft §a!\n  §e您需要扫描您手中的二维码或点击 ");
+        RULES[0] = new TextComponent("  §b欢迎您来到 §eNekoCraft §a!\n  §e您需要扫描您手中的二维码或点击 ");
 
         c = RULES[1] = new TextComponent("[这里]");
         c.setColor(ChatColor.BLUE);
@@ -86,7 +86,7 @@ public final class Constants {
 
         RULES[2] = new TextComponent("  §e来阅读服务器规定\n  §7点击确认后则默认您已阅读并遵守服务器规定!\n       ");
 
-        c = RULES[3] = new TextComponent(" [我已阅读并遵守服务器规定] ");
+        c = RULES[3] = new TextComponent(" [我已阅读并遵守服务器规定] §7或输入指令/acceptrule");
         c.setColor(ChatColor.GREEN);
         c.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/acceptrule"));
 

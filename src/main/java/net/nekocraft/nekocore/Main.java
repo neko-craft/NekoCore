@@ -301,9 +301,10 @@ public final class Main extends JavaPlugin implements Listener {
                 if (b != null && b.getType() == Material.FARMLAND) e.setCancelled(true);
                 break;
             case RIGHT_CLICK_BLOCK:
-                if (e.getItem() != null && e.getClickedBlock() != null &&
-                    e.getClickedBlock().getType() == Material.SPAWNER &&
-                    e.getItem().getType().name().endsWith("_SPAWN_EGG")) e.setCancelled(true);
+                if (e.getClickedBlock() == null) return;
+                final Material type = e.getClickedBlock().getType();
+                if (type == Material.DRAGON_EGG || (e.getItem() != null && type == Material.SPAWNER &&
+                    e.getItem().getType().name().endsWith("_SPAWN_EGG"))) e.setCancelled(true);
         }
     }
 
