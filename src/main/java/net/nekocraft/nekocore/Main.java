@@ -228,12 +228,12 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onQuit(final PlayerQuitEvent e) {
+    public void onPlayerQuit(final PlayerQuitEvent e) {
         e.setQuitMessage("¡ìc- " + Utils.getDisplayName(e.getPlayer()));
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent e) {
+    public void onPlayerJoin(PlayerJoinEvent e) {
         e.setJoinMessage("¡ìa+ " + Utils.getDisplayName(e.getPlayer()));
         final Player p = e.getPlayer();
         final Server s = getServer();
@@ -258,7 +258,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onKill(final EntityDeathEvent e) {
+    public void onEntityDeath(final EntityDeathEvent e) {
         final List<ItemStack> drops = e.getDrops();
         switch (e.getEntityType()) {
             case TURTLE: {
@@ -290,6 +290,15 @@ public final class Main extends JavaPlugin implements Listener {
             case WITCH:
                 drops.removeIf(is -> is.getType() == Material.POTION);
                 break;
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onEntityTransform(final EntityTransformEvent e) {
+        if (e.getEntityType() != EntityType.VILLAGER) return;
+        for (final Entity it : e.getTransformedEntities()) if (it.getType() == EntityType.WITCH) {
+            e.setCancelled(true);
+            return;
         }
     }
 
@@ -328,13 +337,6 @@ public final class Main extends JavaPlugin implements Listener {
                 final Block b2 = block.getRelative(0, -1, 0);
                 if (Utils.isLog(b2.getType())) b2.setType(Material.COAL_BLOCK);
                 break loop;
-            }
-        }
-        if (e.getCause() != LightningStrikeEvent.Cause.TRIDENT &&
-                e.getCause() != LightningStrikeEvent.Cause.COMMAND) for (final Entity it : loc.getNearbyEntities(5, 5, 5)) {
-            if (it.getType() == EntityType.VILLAGER) {
-                e.setCancelled(true);
-                return;
             }
         }
     }
@@ -480,7 +482,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onBlockBreak(final HangingBreakByEntityEvent e) {
+    public void onHangingBreakByEntity(final HangingBreakByEntityEvent e) {
         if (e.getRemover() != null && e.getRemover().getType() == EntityType.CREEPER) e.setCancelled(true);
     }
 
@@ -508,7 +510,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onDamageByEntity(final EntityDamageByEntityEvent e) {
+    public void onEntityDamageByEntity(final EntityDamageByEntityEvent e) {
         switch (e.getDamager().getType()) {
             case CREEPER:
             case ENDER_CRYSTAL:
