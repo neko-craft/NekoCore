@@ -2,6 +2,7 @@ package net.nekocraft.nekocore;
 
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent;
 import com.destroystokyo.paper.profile.ProfileProperty;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -251,10 +252,15 @@ public final class Main extends JavaPlugin implements Listener {
     public void onAsyncPlayerPreLogin(final AsyncPlayerPreLoginEvent e) {
         boolean needKick = true;
         for (final ProfileProperty it : e.getPlayerProfile().getProperties()) if (it.getName().equals("textures")) try {
-            if (PARSER.parse(new String(Base64.getDecoder().decode(it.getValue()))).getAsJsonObject()
-                .getAsJsonObject("textures").getAsJsonObject("SKIN").has("url")) needKick = false;
+            JsonElement urlElement = PARSER.parse(new String(Base64.getDecoder().decode(it.getValue()))).getAsJsonObject()
+                    .getAsJsonObject("textures").getAsJsonObject("SKIN").get("url");
+            if (urlElement != null) {
+                String url = urlElement.getAsString();
+                if (!url.endsWith("1a4af718455d4aab528e7a61f86fa25e6a369d1768dcb13f7df319a713eb810b") &&
+                        !url.endsWith("3b60a1f6d562f52aaebbf1434f1de147933a3affe0e764fa49ea057536623cd3")) needKick = false;
+            }
         } catch (final Exception ignored) { }
-        if (needKick) e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "§c请您先给您的游戏账户设置一个皮肤再尝试进入服务器!");
+        if (needKick) e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "§c请先给您的游戏账户设置一个皮肤再尝试进入服务器!");
     }
 
     @EventHandler
