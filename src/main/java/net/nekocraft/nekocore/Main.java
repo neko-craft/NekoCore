@@ -28,10 +28,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
-import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.*;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -56,12 +53,14 @@ import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 @Author("Shirasawa")
 @Website("https://apisium.cn")
 @ApiVersion(ApiVersion.Target.v1_13)
+@Permission(name = "neko.network", defaultValue = PermissionDefault.TRUE)
 @Permission(name = "neko.show", defaultValue = PermissionDefault.TRUE)
 @Permission(name = "neko.explode")
 @Permission(name = "neko.rsd")
 @Permission(name = "neko.notdeatheffect")
 @Command(name = "show", permission = "neko.show")
 @Command(name = "explode", permission = "neko.explode")
+@Command(name = "network", permission = "neko.network")
 @Command(name = "rsd", permission = "neko.rsd")
 @Command(name = "welcome", aliases = "w")
 @Command(name = "bedrock", aliases = "be")
@@ -71,11 +70,11 @@ import static net.nekocraft.nekocore.utils.Utils.registerCommand;
 public final class Main extends JavaPlugin implements Listener {
     private int i = 0;
     private Thread thread;
-    private static final HashMap<String, Object[]> deathRecords = new HashMap<>();
+    private static final HashMap<UUID, Object[]> deathRecords = new HashMap<>();
     private static final DecimalFormat df = new DecimalFormat("0.00");
     private static final Random RANDOM = new Random();
     private static final JsonParser PARSER = new JsonParser();
-    private World nether, world;
+    private World nether, world, theEnd;
     private final Set<Player> beList = Collections.newSetFromMap(new WeakHashMap<>());
 
     private final Advancement DEATH = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death")),
@@ -97,6 +96,7 @@ public final class Main extends JavaPlugin implements Listener {
         final PluginManager m = s.getPluginManager();
         final AntiExplode antiExplode = new AntiExplode();
         final Rules rules = new Rules(this);
+        new Network(this);
         m.registerEvents(antiExplode, this);
         m.registerEvents(rules, this);
         m.registerEvents(new TimeToSleep(this), this);
@@ -110,6 +110,7 @@ public final class Main extends JavaPlugin implements Listener {
 
         world = s.getWorld("world");
         nether = s.getWorld("world_nether");
+        theEnd = s.getWorld("world_the_end");
         final Location spawn = world.getSpawnLocation();
 
         thread = new Thread(() -> {
@@ -366,11 +367,8 @@ public final class Main extends JavaPlugin implements Listener {
                 for (final Entity it : l.getNearbyEntities(48, 48, 48)) {
                     if (it.getType() == EntityType.VILLAGER) i++;
                 }
-                if (i > 50) {
-                   Bukkit.broadcastMessage("§c有人在 §7" + l.getBlockX() + "," + l.getBlockY() + "," +
-                       l.getBlockZ() + " §c大量繁殖村民.");
-                    e.setCancelled(true);
-                }
+                if (i > 50) Bukkit.broadcastMessage("§c有人在 §7" + l.getBlockX() + "," + l.getBlockY() + "," +
+                        l.getBlockZ() + " §c大量繁殖村民.");
                 return;
         }
         if (!(e.getEntity() instanceof Monster)) return;
@@ -450,23 +448,23 @@ public final class Main extends JavaPlugin implements Listener {
             Utils.giveAdvancement(ad, p);
         }
         if (p.hasPermission("neko.notdeatheffect")) return;
-        deathRecords.put(p.getUniqueId().toString(), new Object[] { p.getExhaustion(), p.getSaturation(), p.getFoodLevel() });
+        deathRecords.put(p.getUniqueId(), new Object[] { p.getExhaustion(), p.getSaturation(), p.getFoodLevel() });
     }
 
     @EventHandler
     public void onPlayerPostRespawn(final PlayerPostRespawnEvent e) {
         final Player p = e.getPlayer();
         if (p.hasPermission("neko.notdeatheffect")) return;
-        final String id = p.getUniqueId().toString();
+        final UUID id = p.getUniqueId();
         final Object[] obj = deathRecords.get(id);
         if (obj != null) {
             p.setExhaustion((float) obj[0]);
             p.setSaturation((float) obj[1]);
             p.setFoodLevel((int) obj[2]);
+            p.setHealth(Objects.requireNonNull(p.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getDefaultValue() / 2);
+            p.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 20 * 30, 1, true, false));
             deathRecords.remove(id);
         }
-        p.setHealth(Objects.requireNonNull(p.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getDefaultValue() / 2);
-        p.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 20 * 30, 1, true, false));
     }
 
     @EventHandler
@@ -478,13 +476,23 @@ public final class Main extends JavaPlugin implements Listener {
             case DRAGON_FIREBALL:
             case ENDER_DRAGON:
             case WITHER_SKULL:
-                e.blockList().clear();
+                break;
+            default:
+                Location loc = e.getLocation();
+                if (loc.getWorld() != world || loc.distanceSquared(world.getSpawnLocation()) > 12544) return;
         }
+        e.blockList().clear();
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(final BlockBreakEvent e) {
-        if (checkTrapChest(e.getPlayer(), e.getBlock().getLocation())) e.setCancelled(true);
+        if (e.getPlayer().isOp()) return;
+        if (checkTrapChestExact(e.getBlock().getLocation())) {
+            Player player = e.getPlayer();
+            getServer().broadcastMessage("§c玩家 §f" + player.getName() + " §c正在尝试从出生点钻石箱中取出物品!!");
+            player.kickPlayer("§c不要尝试偷盗!");
+            e.setCancelled(true);
+        } else if (checkTrapChest(e.getBlock().getLocation())) e.setCancelled(true);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -496,17 +504,12 @@ public final class Main extends JavaPlugin implements Listener {
     public void onInventoryClick(final InventoryClickEvent e) {
         if (e.getWhoClicked().isOp()) return;
         final InventoryHolder holder = e.getView().getTopInventory().getHolder();
-        if (holder instanceof Chest && e.getWhoClicked() instanceof Player) switch (e.getAction()) {
-            case PICKUP_ALL:
-            case PICKUP_ONE:
-            case PICKUP_HALF:
-            case PICKUP_SOME:
-            case HOTBAR_SWAP:
-            case SWAP_WITH_CURSOR:
-            case COLLECT_TO_CURSOR:
-            case MOVE_TO_OTHER_INVENTORY:
-                if (e.getClickedInventory() == e.getView().getTopInventory())
-                    checkTrapChest((Player) e.getWhoClicked(), ((Chest) holder).getLocation());
+        if (holder instanceof Chest && e.getWhoClicked() instanceof Player) {
+            if (e.getClickedInventory() == e.getView().getTopInventory() && checkTrapChestExact(((Chest) holder).getLocation())) {
+                Player player = (Player) e.getWhoClicked();
+                getServer().broadcastMessage("§c玩家 §f" + player.getName() + " §c正在尝试从出生点钻石箱中取出物品!!");
+                player.kickPlayer("§c不要尝试偷盗!");
+            }
         }
     }
 
@@ -577,14 +580,13 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    private boolean checkTrapChest(final Player player, final Location loc) {
-        if (loc.getWorld().getName().equals("world") && loc.getBlockX() == -202 &&
-            loc.getBlockY() == 65 && loc.getBlockZ() == 219) {
-            getServer().broadcastMessage("§c玩家 §f" +
-                player.getName() + " §c正在尝试从出生点钻石箱中取出物品! §b请立即将物品放回箱子内!");
-            player.kickPlayer("§c请立即将拿取的物品放回箱子内!");
-            return true;
-        } else return false;
+    private boolean checkTrapChest(final Location loc) {
+        return loc.getWorld() == world && (Math.pow(loc.getBlockX() + 202, 2) +
+                Math.pow(loc.getBlockY() - 65, 2) + Math.pow(loc.getBlockZ() - 219, 2) <= 4);
+    }
+
+    private boolean checkTrapChestExact(final Location loc) {
+        return loc != null && loc.getWorld() == world && loc.getBlockX() == -202 && loc.getBlockY() == 65 &&loc.getBlockZ() == 219;
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -614,7 +616,8 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(final BlockPlaceEvent e) {
-        if (e.getBlock().getType() == Material.WET_SPONGE) Utils.absorbLava(e.getBlock(), null);
+        if (!e.getPlayer().isOp() && checkTrapChest(e.getBlock().getLocation())) e.setCancelled(true);
+        else if (e.getBlock().getType() == Material.WET_SPONGE) Utils.absorbLava(e.getBlock(), null);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -623,9 +626,31 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onBlockPistonExtend(final BlockPistonExtendEvent e) {
+        for (final Block block : e.getBlocks()) if (checkTrapChest(block.getLocation())) {
+            e.setCancelled(true);
+            return;
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockPistonExtend(final BlockPistonRetractEvent e) {
+        for (final Block block : e.getBlocks()) if (checkTrapChest(block.getLocation())) {
+            e.setCancelled(true);
+            return;
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onEntityChangeBlock(final EntityChangeBlockEvent e) {
         if (e.getEntityType() != EntityType.ENDERMAN) return;
+        final Enderman entity = (Enderman) e.getEntity();
+        if (entity.getWorld() == theEnd) switch (e.getBlock().getType()) {
+            case MELON:
+            case PUMPKIN:
+                return;
+        }
         e.setCancelled(true);
-        ((Enderman) e.getEntity()).setCarriedBlock(null);
+        entity.setCarriedBlock(null);
     }
 }

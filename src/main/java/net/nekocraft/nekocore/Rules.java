@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
@@ -73,7 +74,8 @@ final class Rules implements Listener, CommandExecutor {
     private void removeMap(final Player p) {
         final PlayerInventory i = p.getInventory();
         final ItemStack is = i.getItemInMainHand();
-        if (is.getItemMeta().getDisplayName().equals(ITEM_NAME)) {
+        final ItemMeta im = is.getItemMeta();
+        if (im.hasDisplayName() && im.getDisplayName().equals(ITEM_NAME)) {
             i.remove(is);
             p.updateInventory();
         }

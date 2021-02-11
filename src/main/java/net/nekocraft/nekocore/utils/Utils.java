@@ -19,19 +19,23 @@ import java.util.LinkedList;
 
 @SuppressWarnings("ConstantConditions")
 public final class Utils {
-    private static final Class<?> craftItemStackClazz = ReflectionUtil.getOBCClass("inventory.CraftItemStack");
-    private static final Class<?> nmsItemStackClazz = ReflectionUtil.getNMSClass("ItemStack");
-    private static final Class<?> nbtTagCompoundClazz = ReflectionUtil.getNMSClass("NBTTagCompound");
-    private static final Method asNMSCopyMethod = ReflectionUtil.getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
-    private static final Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
-    private static final Field craftItemStackHandleField = ReflectionUtil.getField(craftItemStackClazz, "handle", true);
+    private static final Class<?> craftItemStackClass = ReflectionUtil.getOBCClass("inventory.CraftItemStack");
+    private static final Class<?> craftPlayerClass = ReflectionUtil.getOBCClass("entity.CraftPlayer");
+    private static final Class<?> nmsItemStackClass = ReflectionUtil.getNMSClass("ItemStack");
+    private static final Class<?> nbtTagCompoundClass = ReflectionUtil.getNMSClass("NBTTagCompound");
+    private static final Class<?> nmsEntityPlayerClass = ReflectionUtil.getNMSClass("EntityPlayer");
+    private static final Method asNMSCopyMethod = ReflectionUtil.getMethod(craftItemStackClass, "asNMSCopy", ItemStack.class);
+    private static final Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClass, "save", nbtTagCompoundClass);
+    private static final Method craftPlayerGetHandle = ReflectionUtil.getMethod(craftPlayerClass, "getHandle");
+    private static final Field craftItemStackHandleField = ReflectionUtil.getField(craftItemStackClass, "handle", true);
+    private static final Field nmsEntityPlayerPingField = ReflectionUtil.getField(nmsEntityPlayerClass, "ping", false);
     private static final BlockFace[] blockFaces = BlockFace.values();
 
     private Utils() {}
 
     public static String convertItemStackToJson(final ItemStack itemStack) {
         try {
-            final Object nmsNbtTagCompoundObj = nbtTagCompoundClazz.newInstance();
+            final Object nmsNbtTagCompoundObj = nbtTagCompoundClass.newInstance();
             return saveNmsItemStackMethod.invoke(getNMSItemStack(itemStack), nmsNbtTagCompoundObj).toString();
         } catch (Exception t) {
             t.printStackTrace();
@@ -41,7 +45,7 @@ public final class Utils {
 
     private static Object getNMSItemStack(final ItemStack itemStack) throws InvocationTargetException, IllegalAccessException {
         Object nms = null;
-        if (craftItemStackClazz.isInstance(itemStack)) try {
+        if (craftItemStackClass.isInstance(itemStack)) try {
             nms = craftItemStackHandleField.get(itemStack);
         } catch (Exception ignored) { }
         return nms == null ? asNMSCopyMethod.invoke(null, itemStack) : nms;
@@ -56,12 +60,22 @@ public final class Utils {
         cmd.setExecutor(e);
     }
 
+    public static int getPlayerPing(final Player player) {
+        try {
+            return (int) nmsEntityPlayerPingField.get(craftPlayerGetHandle.invoke(player));
+        } catch (final Exception e) {
+            return -1;
+        }
+    }
+
     public static String getDisplayName(final Player p) {
         switch (p.getUniqueId().toString()) {
             case "18c7d817-3ad3-4b0f-9106-6eb471dfd530": return "¡ìaÂ¶Â¶";
             case "c0a5ed47-a171-49ba-bd69-cb5b217ae0f2": return "¡ìaBB";
             case "8c33f169-44f1-4a2d-ad9b-9d6b37b363da": return "¡ìa¾õ¾õ";
             case "3de49e85-2e7c-43f9-8ff2-4cea43da4655": return "¡ìaÜ½Ü½";
+            case "a2bf5901-8cd1-44cd-af49-cb7b839d8076": return "¡ìaÂ¶ç÷ÑÇÐ¡ÅóÓÑ";
+            case "0936c888-85d4-424d-8194-f6dceab8ec57": return "¡ìa±¾·þÎ¨Ò»Ö¸¶¨Ã¨ÄïYtonE";
             default: return "¡ìf" + p.getDisplayName();
         }
     }
