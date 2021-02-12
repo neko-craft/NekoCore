@@ -20,7 +20,7 @@ public final class Constants {
 
     public static final String JOIN_MESSAGE_HEADER = "§b§m                       §r §a[§eNekoCraft§a] §b§m                      §r";
     public static final String JOIN_MESSAGE1 = "  §c由于服务器没有领地插件, 请不要随意拿取他人物品, 否则会直接封禁!";
-    public static final String JOIN_MESSAGE_FOOTER = "§b§m                                                          §r\n  §a今天晚上21:00将会举行活动哦, 精彩的焰火表演和小游戏等你参加!\n";
+    public static final String JOIN_MESSAGE_FOOTER = "§b§m                                                          §r\n\n";
     public static final TextComponent[] JOIN_MESSAGES = new TextComponent[9];
 
     public static final TextComponent[] RULES = new TextComponent[6];
