@@ -96,7 +96,6 @@ public final class Main extends JavaPlugin implements Listener {
         final PluginManager m = s.getPluginManager();
         final AntiExplode antiExplode = new AntiExplode();
         final Rules rules = new Rules(this);
-        new Network(this);
         m.registerEvents(antiExplode, this);
         m.registerEvents(rules, this);
         m.registerEvents(new TimeToSleep(this), this);

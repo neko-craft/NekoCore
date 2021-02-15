@@ -20,15 +20,11 @@ import java.util.LinkedList;
 @SuppressWarnings("ConstantConditions")
 public final class Utils {
     private static final Class<?> craftItemStackClass = ReflectionUtil.getOBCClass("inventory.CraftItemStack");
-    private static final Class<?> craftPlayerClass = ReflectionUtil.getOBCClass("entity.CraftPlayer");
     private static final Class<?> nmsItemStackClass = ReflectionUtil.getNMSClass("ItemStack");
     private static final Class<?> nbtTagCompoundClass = ReflectionUtil.getNMSClass("NBTTagCompound");
-    private static final Class<?> nmsEntityPlayerClass = ReflectionUtil.getNMSClass("EntityPlayer");
     private static final Method asNMSCopyMethod = ReflectionUtil.getMethod(craftItemStackClass, "asNMSCopy", ItemStack.class);
     private static final Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClass, "save", nbtTagCompoundClass);
-    private static final Method craftPlayerGetHandle = ReflectionUtil.getMethod(craftPlayerClass, "getHandle");
     private static final Field craftItemStackHandleField = ReflectionUtil.getField(craftItemStackClass, "handle", true);
-    private static final Field nmsEntityPlayerPingField = ReflectionUtil.getField(nmsEntityPlayerClass, "ping", false);
     private static final BlockFace[] blockFaces = BlockFace.values();
 
     private Utils() {}
@@ -58,14 +54,6 @@ public final class Utils {
         cmd.setPermissionMessage(Constants.NO_PERMISSION);
         cmd.setDescription(Constants.COMMAND_DESCRIPTION);
         cmd.setExecutor(e);
-    }
-
-    public static int getPlayerPing(final Player player) {
-        try {
-            return (int) nmsEntityPlayerPingField.get(craftPlayerGetHandle.invoke(player));
-        } catch (final Exception e) {
-            return -1;
-        }
     }
 
     public static String getDisplayName(final Player p) {
