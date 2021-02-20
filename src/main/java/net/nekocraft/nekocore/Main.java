@@ -74,6 +74,7 @@ public final class Main extends JavaPlugin implements Listener {
     private static final JsonParser PARSER = new JsonParser();
     private World nether, world, theEnd;
     private final Set<Player> beList = Collections.newSetFromMap(new WeakHashMap<>());
+    private final Set<Player> warning = Collections.newSetFromMap(new WeakHashMap<>());
 
     private final Advancement DEATH = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death")),
             STRIKE = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_strike")),
@@ -228,7 +229,9 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerQuit(final PlayerQuitEvent e) {
-        e.setQuitMessage("§c- " + Utils.getDisplayName(e.getPlayer()));
+        final Player player = e.getPlayer();
+        e.setQuitMessage("§c- " + Utils.getDisplayName(player));
+        beList.remove(player);
     }
 
     @EventHandler
@@ -243,6 +246,7 @@ public final class Main extends JavaPlugin implements Listener {
         p.sendMessage(Constants.JOIN_MESSAGES);
         p.sendMessage(Constants.JOIN_MESSAGE1);
         p.sendMessage(Constants.JOIN_MESSAGE_FOOTER);
+        if (warning.remove(p)) p.sendMessage("§e注意: 您当前进入服务器所使用的域名将会被废弃! 请使用 neko-craft.com 进入服务器!");
     }
 
 
@@ -370,8 +374,11 @@ public final class Main extends JavaPlugin implements Listener {
         }
         if (!(e.getEntity() instanceof Monster)) return;
         final Monster entity = (Monster) e.getEntity();
-        while (RANDOM.nextInt(10) >= 7) entity.addPotionEffect(
-                new PotionEffect(Constants.EFFECTS[RANDOM.nextInt(Constants.EFFECTS.length - 1)], 144000, RANDOM.nextBoolean() ? 1 : 2));
+        for (int i = 0; i < 2 && RANDOM.nextInt(10) >= 7; i++) {
+            PotionEffectType type = Constants.EFFECTS[RANDOM.nextInt(Constants.EFFECTS.length - 1)];
+            entity.addPotionEffect(new PotionEffect(type, 144000,
+                            type == PotionEffectType.DAMAGE_RESISTANCE || RANDOM.nextBoolean() ? 1 : 2));
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -416,6 +423,11 @@ public final class Main extends JavaPlugin implements Listener {
         });
     }
 
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onPlayerLogin(final PlayerLoginEvent e) {
+        if (e.getResult() == PlayerLoginEvent.Result.ALLOWED && e.getHostname().contains("apisium.cn")) warning.add(e.getPlayer());
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onPlayerDeath(final PlayerDeathEvent e) {
         final Player p = e.getEntity();
@@ -424,6 +436,12 @@ public final class Main extends JavaPlugin implements Listener {
         if (dmg != null) {
             Advancement ad = null;
             switch (dmg.getCause()) {
+                case MAGIC:
+                    if (dmg instanceof EntityDamageByBlockEvent) {
+                        final Block block = ((EntityDamageByBlockEvent) dmg).getDamager();
+                        if (block != null && block.getType() == Material.STONECUTTER) e.setDeathMessage(p.getName() + "裂开了");
+                    }
+                    break;
                 case ENTITY_EXPLOSION:
                 case BLOCK_EXPLOSION:
                     ad = EXPLOSION;
@@ -442,7 +460,7 @@ public final class Main extends JavaPlugin implements Listener {
                     }
                 }
             }
-            Utils.giveAdvancement(ad, p);
+            if (ad != null) Utils.giveAdvancement(ad, p);
         }
         if (p.hasPermission("neko.notdeatheffect")) return;
         deathRecords.put(p.getUniqueId(), new Object[] { p.getExhaustion(), p.getSaturation(), p.getFoodLevel() });

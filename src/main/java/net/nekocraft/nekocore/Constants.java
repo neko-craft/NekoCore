@@ -42,7 +42,7 @@ public final class Constants {
             PotionEffectType.INCREASE_DAMAGE,
             PotionEffectType.JUMP,
             PotionEffectType.REGENERATION,
-            PotionEffectType.FIRE_RESISTANCE,
+            PotionEffectType.DAMAGE_RESISTANCE,
             PotionEffectType.ABSORPTION
     };
 
