@@ -69,7 +69,7 @@ public final class Main extends JavaPlugin implements Listener {
     private int i = 0;
     private Thread thread;
     private static final HashMap<UUID, Object[]> deathRecords = new HashMap<>();
-    private static final DecimalFormat df = new DecimalFormat("0.00");
+    private static final DecimalFormat df = new DecimalFormat("0.0");
     private static final Random RANDOM = new Random();
     private static final JsonParser PARSER = new JsonParser();
     private World nether, world, theEnd;
@@ -127,8 +127,8 @@ public final class Main extends JavaPlugin implements Listener {
                         getServer().shutdown();
                         return;
                     }
-                    final String footer = "\n¡ìaMSPT: ¡ì7" + df.format(s.getTickTimes()[0] / 1000000.0) +
-                        "  ¡ìaTPS: ¡ì7" + df.format(tps) + "\n¡ìb¡ìm                                      ";
+                    final String footer = "\n¡ìaTPS: ¡ì7" + df.format(tps) + " ¡ìaMSPT: ¡ì7" +
+                            df.format(s.getTickTimes()[0] / 1000000.0) + "\n¡ìb¡ìm                                      ";
                     final ArrayList<Player> list = new ArrayList<>();
                     s.getOnlinePlayers().forEach(it -> {
                         it.setPlayerListFooter(footer);
@@ -462,7 +462,7 @@ public final class Main extends JavaPlugin implements Listener {
             }
             if (ad != null) Utils.giveAdvancement(ad, p);
         }
-        if (p.hasPermission("neko.notdeatheffect")) return;
+        if (p.hasPermission("neko.notdeatheffect") || p.getStatistic(Statistic.PLAY_ONE_MINUTE) < 20 * 60 * 40) return;
         deathRecords.put(p.getUniqueId(), new Object[] { p.getExhaustion(), p.getSaturation(), p.getFoodLevel() });
     }
 
