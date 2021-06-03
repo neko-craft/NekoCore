@@ -548,6 +548,12 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onEntityDamageByBlock(final EntityDamageByBlockEvent e) {
+        if (e.getEntityType() == EntityType.VILLAGER && e.getDamager() != null &&
+                e.getDamager().getType() == Material.STONECUTTER) e.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onBlockIgnite(final BlockIgniteEvent e) {
         switch (e.getCause()) {
             case SPREAD:
