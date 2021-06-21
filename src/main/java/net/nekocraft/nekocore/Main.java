@@ -505,7 +505,7 @@ public final class Main extends JavaPlugin implements Listener {
         if (checkTrapChestExact(e.getBlock().getLocation())) {
             Player player = e.getPlayer();
             getServer().broadcastMessage("§c玩家 §f" + player.getName() + " §c正在尝试从出生点钻石箱中取出物品!!");
-            player.kickPlayer("§c不要尝试偷盗!");
+            player.banPlayer("§c不要尝试偷盗! 解封请进入QQ群: 7923309");
             e.setCancelled(true);
         } else if (checkTrapChest(e.getBlock().getLocation())) e.setCancelled(true);
     }
@@ -536,6 +536,8 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onEntityDamageByEntity(final EntityDamageByEntityEvent e) {
         switch (e.getDamager().getType()) {
+            case PLAYER:
+                if (e.getEntityType() != EntityType.VILLAGER) return;
             case CREEPER:
             case ENDER_CRYSTAL:
             case LIGHTNING:

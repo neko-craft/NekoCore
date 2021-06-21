@@ -9,12 +9,12 @@ version = pluginVersion as Object
 repositories {
     mavenCentral()
     maven {
-        name = 'destroystokyo-repo'
-        url = 'https://repo.destroystokyo.com/repository/maven-public/'
+        name = 'papermc'
+        url = 'https://papermc.io/repo/repository/maven-public/'
     }
     maven {
-        name = 'sonatype'
-        url = 'https://oss.sonatype.org/content/groups/public/'
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
 }
 
