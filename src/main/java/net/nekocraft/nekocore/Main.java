@@ -27,6 +27,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
+import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -96,7 +97,6 @@ public final class Main extends JavaPlugin implements Listener {
         final Rules rules = new Rules(this);
         m.registerEvents(antiExplode, this);
         m.registerEvents(rules, this);
-        m.registerEvents(new TimeToSleep(this), this);
         m.registerEvents(this, this);
         registerCommand("explode", antiExplode);
         registerCommand("show", new ShowItem());
@@ -328,6 +328,11 @@ public final class Main extends JavaPlugin implements Listener {
         if (block.getType() != Material.LIGHTNING_ROD) return;
         var b2 = block.getRelative(0, -1, 0);
         if (Utils.isLog(b2.getType())) b2.setType(Material.COAL_BLOCK);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPortalCreate(final PortalCreateEvent e) {
+        if (e.getReason() == PortalCreateEvent.CreateReason.END_PLATFORM) e.setCancelled(true);
     }
 
     @EventHandler(ignoreCancelled = true)

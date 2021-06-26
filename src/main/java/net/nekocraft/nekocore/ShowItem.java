@@ -33,9 +33,8 @@ final class ShowItem implements CommandExecutor {
                 .append(Component.text("]"));
         if (i.getAmount() > 1) c = c.append(Component.text("x" + i.getAmount()));
 
-        Bukkit.broadcast(p.displayName().append(TEXT_C).append(c)
-                .hoverEvent(i.asHoverEvent())
-                .color(NamedTextColor.AQUA));
+        Bukkit.broadcast(p.displayName().color(NamedTextColor.GREEN).append(TEXT_C).append(c.color(NamedTextColor.AQUA))
+                .hoverEvent(i.asHoverEvent()));
         return true;
     }
 }
