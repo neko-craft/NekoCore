@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 final class Welcome implements CommandExecutor {
-    @SuppressWarnings("NullableProblems")
+    @SuppressWarnings({"NullableProblems", "deprecation"})
     @Override
     public boolean onCommand(final CommandSender s, final Command command, final String label, final String[] args) {
         if (!(s instanceof Player)) return false;

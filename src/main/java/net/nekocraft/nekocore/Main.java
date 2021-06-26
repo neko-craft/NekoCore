@@ -7,7 +7,6 @@ import com.google.gson.JsonParser;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.attribute.Attribute;
@@ -46,7 +45,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static net.nekocraft.nekocore.utils.Utils.registerCommand;
+import static net.nekocraft.nekocore.Utils.registerCommand;
 
 @Plugin(name = "NekoCore", version = "1.0")
 @Description("An basic plugin used in NekoCraft.")
@@ -269,7 +268,7 @@ public final class Main extends JavaPlugin implements Listener {
     public void onEntityDeath(final EntityDeathEvent e) {
         final List<ItemStack> drops = e.getDrops();
         switch (e.getEntityType()) {
-            case TURTLE: {
+            case TURTLE -> {
                 final Player killer = e.getEntity().getKiller();
                 int count = 2;
                 if (killer != null) {
@@ -280,24 +279,15 @@ public final class Main extends JavaPlugin implements Listener {
                     if (bound > 0) count += RANDOM.nextInt(bound);
                 }
                 drops.add(new ItemStack(Material.SCUTE, count));
-                break;
             }
-            case RAVAGER:
+            case RAVAGER -> {
                 drops.clear();
                 drops.add(new ItemStack(Material.LEATHER, 4));
-                break;
-            case VINDICATOR:
-                drops.removeIf(it -> it.getType() == Material.WHITE_BANNER || it.getType() == Material.IRON_AXE);
-                break;
-            case EVOKER:
-                drops.removeIf(is -> is.getType() == Material.WHITE_BANNER);
-                break;
-            case PILLAGER:
-                drops.removeIf(it -> it.getType() == Material.WHITE_BANNER || it.getType() == Material.CROSSBOW);
-                break;
-            case WITCH:
-                drops.removeIf(is -> is.getType() == Material.POTION);
-                break;
+            }
+            case VINDICATOR -> drops.removeIf(it -> it.getType() == Material.WHITE_BANNER || it.getType() == Material.IRON_AXE);
+            case EVOKER -> drops.removeIf(is -> is.getType() == Material.WHITE_BANNER);
+            case PILLAGER -> drops.removeIf(it -> it.getType() == Material.WHITE_BANNER || it.getType() == Material.CROSSBOW);
+            case WITCH -> drops.removeIf(is -> is.getType() == Material.POTION);
         }
     }
 
@@ -313,15 +303,16 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(final PlayerInteractEvent e) {
         switch (e.getAction()) {
-            case PHYSICAL:
+            case PHYSICAL -> {
                 final Block b = e.getClickedBlock();
                 if (b != null && b.getType() == Material.FARMLAND) e.setCancelled(true);
-                break;
-            case RIGHT_CLICK_BLOCK:
+            }
+            case RIGHT_CLICK_BLOCK -> {
                 if (e.getClickedBlock() == null) return;
                 final Material type = e.getClickedBlock().getType();
                 if (type == Material.DRAGON_EGG || (e.getItem() != null && type == Material.SPAWNER &&
-                    e.getItem().getType().name().endsWith("_SPAWN_EGG"))) e.setCancelled(true);
+                        e.getItem().getType().name().endsWith("_SPAWN_EGG"))) e.setCancelled(true);
+            }
         }
     }
 
@@ -372,8 +363,7 @@ public final class Main extends JavaPlugin implements Listener {
                         l.getBlockZ() + " §c大量繁殖村民.");
                 return;
         }
-        if (!(e.getEntity() instanceof Monster)) return;
-        final Monster entity = (Monster) e.getEntity();
+        if (!(e.getEntity() instanceof final Monster entity)) return;
         for (int i = 0; i < 2 && RANDOM.nextInt(10) >= 7; i++) {
             PotionEffectType type = Constants.EFFECTS[RANDOM.nextInt(Constants.EFFECTS.length - 1)];
             entity.addPotionEffect(new PotionEffect(type, 144000,
@@ -558,9 +548,7 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onBlockIgnite(final BlockIgniteEvent e) {
         switch (e.getCause()) {
-            case SPREAD:
-            case LAVA:
-                e.setCancelled(true);
+            case SPREAD, LAVA -> e.setCancelled(true);
         }
     }
 

@@ -1,6 +1,5 @@
 package net.nekocraft.nekocore;
 
-import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -13,6 +12,7 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import java.util.Objects;
 import java.util.Random;
 
+@SuppressWarnings("deprecation")
 final class TimeToSleep implements Listener {
     private final World w;
     private int current = 0;

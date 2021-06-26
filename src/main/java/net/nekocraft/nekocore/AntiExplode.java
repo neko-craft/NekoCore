@@ -11,7 +11,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 
 final class AntiExplode implements CommandExecutor, Listener {
     private boolean flag = false;
-    @SuppressWarnings("NullableProblems")
+    @SuppressWarnings({"NullableProblems", "deprecation"})
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (flag) {

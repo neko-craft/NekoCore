@@ -1,7 +1,6 @@
 package net.nekocraft.nekocore;
 
 import com.google.common.collect.Lists;
-import net.nekocraft.nekocore.utils.Utils;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.command.Command;
@@ -60,8 +59,7 @@ final class Rules implements Listener, CommandExecutor {
         }
 
         Objects.requireNonNull(main.getServer().getPluginCommand("denyrule")).setExecutor((sender, c, l, a) -> {
-            if (!(sender instanceof Player)) return false;
-            final Player p = (Player) sender;
+            if (!(sender instanceof final Player p)) return false;
             if (notAccepts.contains(p)) p.kickPlayer("§e[NekoCraft] §c你拒绝遵守服务器规定.");
             else {
                 removeMap(p);
@@ -131,8 +129,7 @@ final class Rules implements Listener, CommandExecutor {
     @SuppressWarnings("NullableProblems")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) return false;
-        final Player p = (Player) sender;
+        if (!(sender instanceof final Player p)) return false;
         final String uuid = p.getUniqueId().toString();
         removeMap(p);
         if (!accepts.contains(uuid)) {

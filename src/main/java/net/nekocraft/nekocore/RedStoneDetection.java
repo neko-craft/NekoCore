@@ -41,6 +41,7 @@ final class RedStoneDetection implements Listener, CommandExecutor {
         player = null;
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void onBlockRedStone(final BlockRedstoneEvent e) {
         final Location loc = e.getBlock().getLocation();
