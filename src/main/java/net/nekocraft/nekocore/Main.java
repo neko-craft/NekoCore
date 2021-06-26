@@ -324,20 +324,10 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onLightingStrike(final LightningStrikeEvent e) {
-        Location loc = e.getLightning().getLocation();
-        final double y = loc.getY();
-        final int x = loc.getBlockX() - 16, z = loc.getBlockZ() - 16;
-        loop: for (int i = 0; i < 32; i++) for (int j = 0; j < 32; j++) {
-            final Block block = world.getHighestBlockAt(x + i, z + j);
-            final Location loc2 = block.getLocation();
-            if (loc2.getY() >= y && Utils.isConductive(block.getType())) {
-                loc = loc2.toCenterLocation();
-                e.getLightning().teleport(loc);
-                final Block b2 = block.getRelative(0, -1, 0);
-                if (Utils.isLog(b2.getType())) b2.setType(Material.COAL_BLOCK);
-                break loop;
-            }
-        }
+        var block = e.getLightning().getLocation().getBlock();
+        if (block.getType() != Material.LIGHTNING_ROD) return;
+        var b2 = block.getRelative(0, -1, 0);
+        if (Utils.isLog(b2.getType())) b2.setType(Material.COAL_BLOCK);
     }
 
     @EventHandler(ignoreCancelled = true)
