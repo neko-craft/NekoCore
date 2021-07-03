@@ -11,9 +11,35 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 
 public final class Utils {
+    private static final World world = Bukkit.getWorld("world");
+    private static final Object nmsWorld;
+    private static Method getX, getY, getZ, toRodLightingLocation;
+    private static Constructor<?> blockPositionConstructor;
+
+    static {
+        Object nmsWorld0 = null;
+        try {
+            assert world != null;
+            final Class<?> CraftWorld = world.getClass();
+            nmsWorld0 = CraftWorld.getMethod("getHandle").invoke(world);
+            toRodLightingLocation = nmsWorld0.getClass().getDeclaredMethod("a", Class.forName("net.minecraft.core.BlockPosition"));
+            toRodLightingLocation.setAccessible(true);
+            var bp = Class.forName("net.minecraft.core.BlockPosition");
+            getX = bp.getMethod("getX");
+            getY = bp.getMethod("getY");
+            getZ = bp.getMethod("getZ");
+            blockPositionConstructor = bp.getConstructor(double.class, double.class, double.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        nmsWorld = nmsWorld0;
+    }
+
     private static final BlockFace[] blockFaces = BlockFace.values();
 
     private Utils() {}
@@ -87,6 +113,18 @@ public final class Utils {
         };
     }
 
+    @SuppressWarnings("ConstantConditions")
+    public static void strikeLightning(Location loc) {
+        if (loc.getWorld() != world) return;
+        try {
+            var newLoc = toRodLightingLocation.invoke(nmsWorld,
+                    blockPositionConstructor.newInstance(loc.getX(), loc.getY(), loc.getZ()));
+            loc = new Location(loc.getWorld(), (int) getX.invoke(newLoc), (int) getY.invoke(newLoc),
+                    (int) getZ.invoke(newLoc));
+        } catch (Exception e) { e.printStackTrace(); }
+        world.strikeLightning(loc);
+    }
+
     public static boolean isConductive(final ItemStack item) {
         return item != null && isConductive(item.getType());
     }
@@ -105,7 +143,7 @@ public final class Utils {
                     CUT_COPPER_STAIRS, EXPOSED_CUT_COPPER_STAIRS, EXPOSED_COPPER, EXPOSED_CUT_COPPER,
                     EXPOSED_CUT_COPPER_SLAB, RAW_COPPER, RAW_COPPER_BLOCK, OXIDIZED_COPPER, OXIDIZED_CUT_COPPER,
                     OXIDIZED_CUT_COPPER_SLAB, OXIDIZED_CUT_COPPER_STAIRS, WEATHERED_COPPER, WEATHERED_CUT_COPPER_SLAB,
-                    WEATHERED_CUT_COPPER_STAIRS -> true;
+                    WEATHERED_CUT_COPPER_STAIRS, LIGHTNING_ROD -> true;
             default -> false;
         };
     }

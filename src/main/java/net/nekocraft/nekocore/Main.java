@@ -161,7 +161,7 @@ public final class Main extends JavaPlugin implements Listener {
                                         Utils.isConductive(inv.getChestplate()) ||
                                         Utils.isConductive(inv.getLeggings()) ||
                                         Utils.isConductive(inv.getHelmet())) {
-                                    s.getScheduler().runTask(this, () -> world.strikeLightning(loc));
+                                    s.getScheduler().runTask(this, () -> Utils.strikeLightning(loc));
                                     return;
                                 }
                             }
@@ -175,10 +175,10 @@ public final class Main extends JavaPlugin implements Listener {
                                     final Material type = block.getType();
                                     if (!(type == Material.AIR || Utils.isLeaves(type) || Utils.isLog(type))) return;
                                 }
-                                s.getScheduler().runTask(this, () -> world.strikeLightning(loc));
+                                s.getScheduler().runTask(this, () -> Utils.strikeLightning(loc));
                             }
                         });
-                        world.getEntities().forEach(it -> {
+                        getServer().getScheduler().runTask(this, () -> world.getEntities().forEach(it -> {
                             if (it.getType() == EntityType.DROPPED_ITEM) {
                                 if (!Utils.isConductive(((Item) it).getItemStack().getType())) return;
                             } else if (it instanceof Monster) {
@@ -191,9 +191,8 @@ public final class Main extends JavaPlugin implements Listener {
                                         Utils.isConductive(inv.getHelmet()))) return;
                             } else return;
                             if (!it.isInRain() || RANDOM.nextInt(14) != 0) return;
-                            final Location loc = it.getLocation();
-                            getServer().getScheduler().runTask(this, () -> world.strikeLightning(loc));
-                        });
+                            Utils.strikeLightning(it.getLocation());
+                        }));
                     }
                     Thread.sleep(2000);
                 }
@@ -247,7 +246,6 @@ public final class Main extends JavaPlugin implements Listener {
         p.sendMessage(Constants.JOIN_MESSAGE_FOOTER);
         if (warning.remove(p)) p.sendMessage("§e注意: 您当前进入服务器所使用的域名将会被废弃! 请使用 neko-craft.com 进入服务器!");
     }
-
 
     @EventHandler(ignoreCancelled = true)
     public void onAsyncPlayerPreLogin(final AsyncPlayerPreLoginEvent e) {

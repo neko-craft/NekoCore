@@ -73,7 +73,7 @@ final class Rules implements Listener, CommandExecutor {
         final PlayerInventory i = p.getInventory();
         final ItemStack is = i.getItemInMainHand();
         final ItemMeta im = is.getItemMeta();
-        if (im.hasDisplayName() && im.getDisplayName().equals(ITEM_NAME)) {
+        if (im != null && im.hasDisplayName() && im.getDisplayName().equals(ITEM_NAME)) {
             i.remove(is);
             p.updateInventory();
         }
