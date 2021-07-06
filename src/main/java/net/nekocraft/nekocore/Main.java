@@ -81,6 +81,7 @@ public final class Main extends JavaPlugin implements Listener {
             HUNGRY = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_hungry")),
             EXPLOSION = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_explosion")),
             STABBED = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_stabbed")),
+            STONECUTTER = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/death_stonecutter")),
             FIRST_STEP = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/first_step")),
             CHAT = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/chat")),
             QUESTION = Bukkit.getAdvancement(new NamespacedKey("nekocraft", "nekocraft/chat_question")),
@@ -422,7 +423,10 @@ public final class Main extends JavaPlugin implements Listener {
                 case MAGIC:
                     if (dmg instanceof EntityDamageByBlockEvent) {
                         final Block block = ((EntityDamageByBlockEvent) dmg).getDamager();
-                        if (block != null && block.getType() == Material.STONECUTTER) e.setDeathMessage(p.getName() + "裂开了");
+                        if (block != null && block.getType() == Material.STONECUTTER) {
+                            e.setDeathMessage(p.getName() + "裂开了");
+                            ad = STONECUTTER;
+                        }
                     }
                     break;
                 case ENTITY_EXPLOSION:
@@ -506,7 +510,7 @@ public final class Main extends JavaPlugin implements Listener {
             if (e.getClickedInventory() == e.getView().getTopInventory() && checkTrapChestExact(((Chest) holder).getLocation())) {
                 Player player = (Player) e.getWhoClicked();
                 getServer().broadcastMessage("§c玩家 §f" + player.getName() + " §c正在尝试从出生点钻石箱中取出物品!!");
-                player.kickPlayer("§c不要尝试偷盗!");
+                player.banPlayer("§c不要尝试偷盗!");
             }
         }
     }
@@ -518,9 +522,15 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityDamageByEntity(final EntityDamageByEntityEvent e) {
+        if (e.getEntityType() == EntityType.VILLAGER && !((Villager) e.getEntity()).hasAI()) e.setCancelled(true);
         switch (e.getDamager().getType()) {
             case PLAYER:
-                if (e.getEntityType() != EntityType.VILLAGER) return;
+                if (e.getEntityType() == EntityType.VILLAGER &&
+                        ((Player) e.getDamager()).getInventory().getItemInMainHand().getType() == Material.BLAZE_ROD) {
+                    var villager = (Villager) e.getEntity();
+                    villager.setAI(!villager.hasAI());
+                    break;
+                } else return;
             case CREEPER:
             case ENDER_CRYSTAL:
             case LIGHTNING:
@@ -534,8 +544,8 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityDamageByBlock(final EntityDamageByBlockEvent e) {
-        if (e.getEntityType() == EntityType.VILLAGER && e.getDamager() != null &&
-                e.getDamager().getType() == Material.STONECUTTER) e.setCancelled(true);
+        if (e.getEntityType() == EntityType.VILLAGER && ((e.getDamager() != null &&
+                e.getDamager().getType() == Material.STONECUTTER) || !((Villager) e.getEntity()).hasAI())) e.setCancelled(true);
     }
 
     @EventHandler(ignoreCancelled = true)
