@@ -142,7 +142,7 @@ final class Rules implements Listener, CommandExecutor {
                 writer.close();
             } catch (IOException e) { e.printStackTrace(); }
             p.sendMessage("§a感谢您接受了服务器的规定, 同时也希望您能一直遵守规定!");
-            p.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 10));
+            p.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
             Bukkit.broadcastMessage("§b欢迎新玩家 §7" + p.getDisplayName() + " §b加入了服务器!");
         }
         Utils.giveAdvancement(ROOT, p);

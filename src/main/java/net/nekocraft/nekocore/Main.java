@@ -115,7 +115,7 @@ public final class Main extends JavaPlugin implements Listener {
             try {
                 while (true) {
                     final double tps = s.getTPS()[0];
-                    if (tps < 8) i++;
+                    if (tps < 4.5) i++;
                     else i = 0;
                     if (i > 20) {
                         getServer().broadcastMessage("§c服务器 TPS 低, 将在五秒后自动重启!");
@@ -510,7 +510,7 @@ public final class Main extends JavaPlugin implements Listener {
             if (e.getClickedInventory() == e.getView().getTopInventory() && checkTrapChestExact(((Chest) holder).getLocation())) {
                 Player player = (Player) e.getWhoClicked();
                 getServer().broadcastMessage("§c玩家 §f" + player.getName() + " §c正在尝试从出生点钻石箱中取出物品!!");
-                player.banPlayer("§c不要尝试偷盗!");
+                player.banPlayer("§c不要尝试偷盗! 解封请进入QQ群: 7923309");
             }
         }
     }
