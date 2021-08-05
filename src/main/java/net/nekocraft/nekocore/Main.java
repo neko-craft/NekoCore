@@ -24,6 +24,7 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.SmithItemEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
@@ -261,6 +262,13 @@ public final class Main extends JavaPlugin implements Listener {
             }
         } catch (final Exception ignored) { }
         if (needKick) e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "§c请先给您的游戏账户设置一个皮肤再尝试进入服务器!");
+    }
+
+    @EventHandler
+    public void onAsyncPlayerPreLogin(final SmithItemEvent e) {
+        ItemStack is = e.getInventory().getResult();
+        if (is == null || is.getType() != Material.DIAMOND) return;
+        e.getInventory().setResult(new ItemStack(Material.DIAMOND, is.getAmount()));
     }
 
     @EventHandler
