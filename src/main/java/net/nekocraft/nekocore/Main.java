@@ -247,6 +247,7 @@ public final class Main extends JavaPlugin implements Listener {
         p.sendMessage(Constants.JOIN_MESSAGE1);
         p.sendMessage(Constants.JOIN_MESSAGE_FOOTER);
         if (warning.remove(p)) p.sendMessage("§e注意: 您当前进入服务器所使用的域名将会被废弃! 请使用 neko-craft.com 进入服务器!");
+        p.sendMessage("§b8月15日将是 §e§lNekoCraft §b的两周年, 届时我们将会举行庆典 §7(晚上8点)§b, 欢迎您的参加!");
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -265,7 +266,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onAsyncPlayerPreLogin(final SmithItemEvent e) {
+    public void onSmithItem(final SmithItemEvent e) {
         ItemStack is = e.getInventory().getResult();
         if (is == null || is.getType() != Material.DIAMOND) return;
         e.getInventory().setResult(new ItemStack(Material.DIAMOND, is.getAmount()));
@@ -309,18 +310,8 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(final PlayerInteractEvent e) {
-        switch (e.getAction()) {
-            case PHYSICAL -> {
-                final Block b = e.getClickedBlock();
-                if (b != null && b.getType() == Material.FARMLAND) e.setCancelled(true);
-            }
-            case RIGHT_CLICK_BLOCK -> {
-                if (e.getClickedBlock() == null) return;
-                final Material type = e.getClickedBlock().getType();
-                if (type == Material.DRAGON_EGG || (e.getItem() != null && type == Material.SPAWNER &&
-                        e.getItem().getType().name().endsWith("_SPAWN_EGG"))) e.setCancelled(true);
-            }
-        }
+        if (e.getAction() == Action.PHYSICAL && e.getClickedBlock() != null &&
+                e.getClickedBlock().getType() == Material.FARMLAND) e.setCancelled(true);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -346,6 +337,8 @@ public final class Main extends JavaPlugin implements Listener {
     public void onEntitySpawn(final EntitySpawnEvent e) {
         switch (e.getEntityType()) {
             case CREEPER: return;
+            case ENDERMAN:
+                if (e.getLocation().getWorld() != theEnd || getServer().getTPS()[0] >= 16.0) break;
             case BAT:
                 e.setCancelled(true);
                 return;
