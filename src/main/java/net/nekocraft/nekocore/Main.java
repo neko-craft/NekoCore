@@ -247,7 +247,6 @@ public final class Main extends JavaPlugin implements Listener {
         p.sendMessage(Constants.JOIN_MESSAGE1);
         p.sendMessage(Constants.JOIN_MESSAGE_FOOTER);
         if (warning.remove(p)) p.sendMessage("§e注意: 您当前进入服务器所使用的域名将会被废弃! 请使用 neko-craft.com 进入服务器!");
-        p.sendMessage("§b8月15日将是 §e§lNekoCraft §b的两周年, 届时我们将会举行庆典 §7(晚上8点)§b, 欢迎您的参加!");
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -323,6 +322,8 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onLightingStrike(final LightningStrikeEvent e) {
         var block = e.getLightning().getLocation().getBlock();
+        if (block.getY() < 2) return;
+        block = block.getRelative(0, -1, 0);
         if (block.getType() != Material.LIGHTNING_ROD) return;
         var b2 = block.getRelative(0, -1, 0);
         if (Utils.isLog(b2.getType())) b2.setType(Material.COAL_BLOCK);
