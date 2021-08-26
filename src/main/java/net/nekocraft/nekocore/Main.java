@@ -367,7 +367,7 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onChat(final AsyncPlayerChatEvent e) {
         final StringBuilder sb = new StringBuilder();
         final String n = e.getPlayer().getName();

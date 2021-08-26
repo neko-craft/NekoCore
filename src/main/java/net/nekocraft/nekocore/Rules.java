@@ -30,7 +30,7 @@ import java.util.Objects;
 
 @SuppressWarnings("deprecation")
 final class Rules implements Listener, CommandExecutor {
-    private static final String ITEM_NAME = "§e服务器规则二维码";
+    private static final String ITEM_NAME = "§e服务器规则二维码", NOT_ACCEPTED = "§c你还没有打开聊天框点击§a[同意服务器规定]§c!";
     private static final Render render = new Render();
     private final Location spawn;
     private final MapView map = Bukkit.createMap(Objects.requireNonNull(Bukkit.getWorld("world")));
@@ -105,17 +105,28 @@ final class Rules implements Listener, CommandExecutor {
         notAccepts.remove(e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent e) {
         if (notAccepts.contains(e.getPlayer()) && spawn.distance(e.getTo()) > 10) e.setCancelled(true);
     }
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onDrop(PlayerDropItemEvent e) {
         if (notAccepts.contains(e.getPlayer())) e.setCancelled(true);
     }
-    @EventHandler
-    public void onChat(AsyncPlayerChatEvent e) {
-        if (notAccepts.contains(e.getPlayer())) e.setCancelled(true);
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
+        if (notAccepts.contains(e.getPlayer()) && !("/denyrule".equals(e.getMessage()) ||
+                "/acceptrule".equals(e.getMessage()))) {
+            e.setCancelled(true);
+            e.getPlayer().sendActionBar(NOT_ACCEPTED);
+        }
+    }
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    public void onAsyncPlayerChat(AsyncPlayerChatEvent e) {
+        if (notAccepts.contains(e.getPlayer())) {
+            e.setCancelled(true);
+            e.getPlayer().sendActionBar(NOT_ACCEPTED);
+        }
     }
     @EventHandler
     public void onSwap(PlayerSwapHandItemsEvent e) {
