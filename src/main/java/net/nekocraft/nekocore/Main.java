@@ -26,6 +26,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.SmithItemEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.raid.RaidTriggerEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.event.world.PortalCreateEvent;
@@ -63,6 +64,7 @@ import static net.nekocraft.nekocore.Utils.registerCommand;
 @Command(name = "rsd", permission = "neko.rsd")
 @Command(name = "welcome", aliases = "w")
 @Command(name = "bedrock", aliases = "be")
+@Command(name = "toggle")
 @Command(name = "acceptrule")
 @Command(name = "denyrule")
 @SuppressWarnings({"unused", "deprecation"})
@@ -106,6 +108,10 @@ public final class Main extends JavaPlugin implements Listener {
         registerCommand("acceptrule", rules);
         registerCommand("welcome", new Welcome());
         registerCommand("bedrock", this);
+        registerCommand("toggle", (a, b, c, d) -> {
+            a.sendMessage("§c模式切换命令已更改为 §e/gamemode§c. 也可使用 §eF3 + N §c进行切换.");
+            return true;
+        });
 
         world = s.getWorld("world");
         nether = s.getWorld("world_nether");
@@ -335,11 +341,22 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onRaidTrigger(final RaidTriggerEvent e) {
+        if (getServer().getTPS()[0] < 16.0) e.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onEntitySpawn(final EntitySpawnEvent e) {
         switch (e.getEntityType()) {
             case CREEPER: return;
+            case WITHER:
+            case PILLAGER:
+            case RAVAGER:
+            case EVOKER:
+            case EVOKER_FANGS:
+            case VINDICATOR:
             case ENDERMAN:
-                if (e.getLocation().getWorld() != theEnd || getServer().getTPS()[0] >= 16.0) break;
+                if (getServer().getTPS()[0] >= 16.0) break;
             case BAT:
                 e.setCancelled(true);
                 return;
@@ -350,13 +367,14 @@ public final class Main extends JavaPlugin implements Listener {
                 if (RANDOM.nextBoolean()) ((Zombie) e.getEntity()).setShouldBurnInDay(false);
                 break;
             case VILLAGER:
-                int i = 0;
+                CreatureSpawnEvent.SpawnReason reason = e.getEntity().getEntitySpawnReason();
+                if (reason == CreatureSpawnEvent.SpawnReason.CUSTOM ||
+                        reason == CreatureSpawnEvent.SpawnReason.COMMAND) return;
                 final Location l = e.getLocation();
-                for (final Entity it : l.getNearbyEntities(48, 48, 48)) {
-                    if (it.getType() == EntityType.VILLAGER) i++;
+                if (l.getNearbyEntitiesByType(Villager.class, 48).size() > 50) {
+                    Bukkit.broadcastMessage("§c有人在 §7" + l.getBlockX() + "," + l.getBlockY() + "," +
+                            l.getBlockZ() + " §c大量繁殖村民.");
                 }
-                if (i > 50) Bukkit.broadcastMessage("§c有人在 §7" + l.getBlockX() + "," + l.getBlockY() + "," +
-                        l.getBlockZ() + " §c大量繁殖村民.");
                 return;
         }
         if (!(e.getEntity() instanceof final Monster entity)) return;

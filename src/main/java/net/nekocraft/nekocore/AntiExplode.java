@@ -1,13 +1,16 @@
 package net.nekocraft.nekocore;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 
 final class AntiExplode implements CommandExecutor, Listener {
     private boolean flag = false;
@@ -28,7 +31,18 @@ final class AntiExplode implements CommandExecutor, Listener {
 
     @EventHandler
     public void onEntityExplode(final EntityExplodeEvent e) {
-        if (flag && (e.getEntityType() == EntityType.PRIMED_TNT || e.getEntityType() == EntityType.MINECART_TNT))
-            e.blockList().clear();
+        if (flag) e.blockList().clear();
+    }
+
+    @SuppressWarnings("deprecation")
+    @EventHandler(ignoreCancelled = true)
+    public void onEntitySpawn(final EntitySpawnEvent e) {
+        if (flag && (e.getEntityType() == EntityType.WITHER || e.getEntityType() == EntityType.ENDER_DRAGON)) {
+            e.setCancelled(true);
+            Location loc = e.getLocation();
+            Bukkit.broadcastMessage("§c" + loc.getNearbyPlayers(16).stream().findFirst()
+                    .map(HumanEntity::getName).orElse("有人") + "尝试在 (" + loc.getWorld().getName() + ", " +
+                    loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ") 生成凋零或末影龙!");
+        }
     }
 }
