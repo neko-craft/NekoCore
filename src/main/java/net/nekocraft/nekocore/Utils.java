@@ -56,15 +56,15 @@ public final class Utils {
     @SuppressWarnings("deprecation")
     public static String getDisplayName(final Player p) {
         return switch (p.getUniqueId().toString()) {
-            case "18c7d817-3ad3-4b0f-9106-6eb471dfd530" -> "¡ìfÂ¶Â¶";
-            case "c0a5ed47-a171-49ba-bd69-cb5b217ae0f2" -> "¡ìfÇçÃ¨";
-            case "8c33f169-44f1-4a2d-ad9b-9d6b37b363da" -> "¡ìf¾õ¾õ";
-            case "70d557ce-c6fc-43b2-b356-d2957d92c700" -> "¡ìf±âÜ½Fulandre_Scarlet";
-            case "e59cd3bc-5c8a-485a-b7a6-0dad75da74c6" -> "¡ìfÅÝÜ½Flandern_S";
-            case "a2bf5901-8cd1-44cd-af49-cb7b839d8076" -> "¡ìfÂ¶ç÷ÑÇÐ¡ÅóÓÑ";
-            case "0936c888-85d4-424d-8194-f6dceab8ec57" -> "¡ìfÃ¨ÄïYtonE";
-            case "89d9e62f-0e37-412d-a4a4-3a124317f851" -> "¡ìf±¾·þ×îË§Ð¡¶¯Îïtobell";
-            default -> "¡ìf" + p.getDisplayName();
+            case "18c7d817-3ad3-4b0f-9106-6eb471dfd530" -> "Â§féœ²éœ²";
+            case "c0a5ed47-a171-49ba-bd69-cb5b217ae0f2" -> "Â§fæ™´çŒ«";
+            case "8c33f169-44f1-4a2d-ad9b-9d6b37b363da" -> "Â§fè§‰è§‰";
+            case "70d557ce-c6fc-43b2-b356-d2957d92c700" -> "Â§fæ‰èŠ™Fulandre_Scarlet";
+            case "e59cd3bc-5c8a-485a-b7a6-0dad75da74c6" -> "Â§fæ³¡èŠ™Flandern_S";
+            case "a2bf5901-8cd1-44cd-af49-cb7b839d8076" -> "Â§féœ²çªäºšå°æœ‹å‹";
+            case "0936c888-85d4-424d-8194-f6dceab8ec57" -> "Â§fçŒ«å¨˜YtonE";
+            case "89d9e62f-0e37-412d-a4a4-3a124317f851" -> "Â§fæœ¬æœæœ€å¸…å°åŠ¨ç‰©tobell";
+            default -> "Â§f" + p.getDisplayName();
         };
     }
 

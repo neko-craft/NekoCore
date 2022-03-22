@@ -13,19 +13,19 @@ import java.util.regex.Pattern;
 public final class Constants {
     private Constants() {}
     public static final String COMMAND_DESCRIPTION = "A NekoCraft provided command.";
-    public static final String WRONG_USAGE = "¡ìc´íÎóµÄÃüÁîÓÃ·¨!";
-    public static final String NO_PERMISSION = "¡ìcÄãÃ»ÓĞÈ¨ÏŞÀ´Ö´ĞĞÕâ¸öÖ¸Áî!";
+    public static final String WRONG_USAGE = "Â§cé”™è¯¯çš„å‘½ä»¤ç”¨æ³•!";
+    public static final String NO_PERMISSION = "Â§cä½ æ²¡æœ‰æƒé™æ¥æ‰§è¡Œè¿™ä¸ªæŒ‡ä»¤!";
 
-    public static final String PLAYER_HEADER = "¡ìb¡ìm          ¡ìr ¡ìa[¡ìeNekoCraft¡ìa] ¡ìb¡ìm          \n¡ìaTelegram Èº×é: ¡ì7t.me/NekoCraft\n¡ìaQQ Èº: ¡ì77923309\n¡ìr";
+    public static final String PLAYER_HEADER = "Â§bÂ§m          Â§r Â§a[Â§eNekoCraftÂ§a] Â§bÂ§m          \nÂ§aTelegram ç¾¤ç»„: Â§7t.me/NekoCraft\nÂ§aQQ ç¾¤: Â§77923309\nÂ§r";
 
-    public static final String JOIN_MESSAGE_HEADER = "¡ìb¡ìm                       ¡ìr ¡ìa[¡ìeNekoCraft¡ìa] ¡ìb¡ìm                      ¡ìr";
-    public static final String JOIN_MESSAGE1 = "  ¡ìcÓÉÓÚ·şÎñÆ÷Ã»ÓĞÁìµØ²å¼ş, Çë²»ÒªËæÒâÄÃÈ¡ËûÈËÎïÆ·, ·ñÔò»áÖ±½Ó·â½û!";
-    public static final String JOIN_MESSAGE_FOOTER = "¡ìb¡ìm                                                          ¡ìr\n\n";
+    public static final String JOIN_MESSAGE_HEADER = "Â§bÂ§m                       Â§r Â§a[Â§eNekoCraftÂ§a] Â§bÂ§m                      Â§r";
+    public static final String JOIN_MESSAGE1 = "  Â§cç”±äºæœåŠ¡å™¨æ²¡æœ‰é¢†åœ°æ’ä»¶, è¯·ä¸è¦éšæ„æ‹¿å–ä»–äººç‰©å“, å¦åˆ™ä¼šç›´æ¥å°ç¦!";
+    public static final String JOIN_MESSAGE_FOOTER = "Â§bÂ§m                                                          Â§r\n\n";
     public static final TextComponent[] JOIN_MESSAGES = new TextComponent[9];
 
     public static final TextComponent[] RULES = new TextComponent[6];
-    public static final HoverEvent AT = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{ new TextComponent("¡ìfµã»÷¿ÉÒÔÖ±½Ó ¡ìa@ ¡ìf¸ÃÍæ¼Ò") }),
-        TPA = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{ new TextComponent("µã»÷¿ÉÒÔ¸´ÖÆÎÄ±¾") });
+    public static final HoverEvent AT = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{ new TextComponent("Â§fç‚¹å‡»å¯ä»¥ç›´æ¥ Â§a@ Â§fè¯¥ç©å®¶") }),
+        TPA = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{ new TextComponent("ç‚¹å‡»å¯ä»¥å¤åˆ¶æ–‡æœ¬") });
 
     public static final Pattern[] DANGER_COMMANDS = {
             Pattern.compile("kill @e *$"),
@@ -47,7 +47,7 @@ public final class Constants {
     };
 
     static {
-        (JOIN_MESSAGES[0] = new TextComponent("  QQ Èº: ")).setColor(ChatColor.GREEN);
+        (JOIN_MESSAGES[0] = new TextComponent("  QQ ç¾¤: ")).setColor(ChatColor.GREEN);
 
         TextComponent c = JOIN_MESSAGES[1] = new TextComponent("7923309");
         c.setColor(ChatColor.GRAY);
@@ -56,21 +56,21 @@ public final class Constants {
 
         JOIN_MESSAGES[2] = new TextComponent("      ");
 
-        (JOIN_MESSAGES[3] = new TextComponent("Telegram Èº×é: ")).setColor(ChatColor.GREEN);
+        (JOIN_MESSAGES[3] = new TextComponent("Telegram ç¾¤ç»„: ")).setColor(ChatColor.GREEN);
 
         c = JOIN_MESSAGES[4] = new TextComponent("@NekoCraft");
         c.setColor(ChatColor.GRAY);
         c.setUnderlined(true);
         c.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://t.me/NekoCraft"));
 
-        (JOIN_MESSAGES[5] = new TextComponent("\n  ÓÃ»§ÖĞĞÄ & ´óµØÍ¼: ")).setColor(ChatColor.GREEN);
+        (JOIN_MESSAGES[5] = new TextComponent("\n  ç”¨æˆ·ä¸­å¿ƒ & å¤§åœ°å›¾: ")).setColor(ChatColor.GREEN);
 
         JOIN_MESSAGES[6] = c = new TextComponent("user.neko-craft.com");
         c.setColor(ChatColor.GRAY);
         c.setUnderlined(true);
         c.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://user.neko-craft.com"));
 
-        (JOIN_MESSAGES[7] = new TextComponent("\n  ·şÎñÆ÷µØÖ· & ¹ÙÍø: ")).setColor(ChatColor.GREEN);
+        (JOIN_MESSAGES[7] = new TextComponent("\n  æœåŠ¡å™¨åœ°å€ & å®˜ç½‘: ")).setColor(ChatColor.GREEN);
 
         JOIN_MESSAGES[8] = c = new TextComponent("neko-craft.com");
         c.setColor(ChatColor.GRAY);
@@ -78,22 +78,22 @@ public final class Constants {
         c.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://neko-craft.com"));
 
 
-        RULES[0] = new TextComponent("  ¡ìb»¶Ó­ÄúÀ´µ½ ¡ìeNekoCraft ¡ìa!\n  ¡ìeÄúĞèÒªÉ¨ÃèÄúÊÖÖĞµÄ¶şÎ¬Âë»òµã»÷ ");
+        RULES[0] = new TextComponent("  Â§bæ¬¢è¿æ‚¨æ¥åˆ° Â§eNekoCraft Â§a!\n  Â§eæ‚¨éœ€è¦æ‰«ææ‚¨æ‰‹ä¸­çš„äºŒç»´ç æˆ–ç‚¹å‡» ");
 
-        c = RULES[1] = new TextComponent("[ÕâÀï]");
+        c = RULES[1] = new TextComponent("[è¿™é‡Œ]");
         c.setColor(ChatColor.BLUE);
         c.setUnderlined(true);
         c.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://user.neko-craft.com/#/about"));
 
-        RULES[2] = new TextComponent("  ¡ìeÀ´ÔÄ¶Á·şÎñÆ÷¹æ¶¨\n  ¡ì7µã»÷È·ÈÏºóÔòÄ¬ÈÏÄúÒÑÔÄ¶Á²¢×ñÊØ·şÎñÆ÷¹æ¶¨!\n       ");
+        RULES[2] = new TextComponent("  Â§eæ¥é˜…è¯»æœåŠ¡å™¨è§„å®š\n  Â§7ç‚¹å‡»ç¡®è®¤ååˆ™é»˜è®¤æ‚¨å·²é˜…è¯»å¹¶éµå®ˆæœåŠ¡å™¨è§„å®š!\n       ");
 
-        c = RULES[3] = new TextComponent(" [ÎÒÒÑÔÄ¶Á²¢×ñÊØ·şÎñÆ÷¹æ¶¨] ¡ì7»òÊäÈëÖ¸Áî/acceptrule");
+        c = RULES[3] = new TextComponent(" [æˆ‘å·²é˜…è¯»å¹¶éµå®ˆæœåŠ¡å™¨è§„å®š] Â§7æˆ–è¾“å…¥æŒ‡ä»¤/acceptrule");
         c.setColor(ChatColor.GREEN);
         c.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/acceptrule"));
 
         RULES[4] = new TextComponent("      ");
 
-        c = RULES[5] = new TextComponent("[¾Ü¾ø]");
+        c = RULES[5] = new TextComponent("[æ‹’ç»]");
         c.setColor(ChatColor.RED);
         c.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/denyrule"));
     }

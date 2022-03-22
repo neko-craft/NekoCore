@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 final class ShowItem implements CommandExecutor {
-    private final static Component TEXT_C = Component.text(" ÏòÄãÕ¹Ê¾ÁËÒ»¸öÎïÆ·: ").color(NamedTextColor.GRAY);
+    private final static Component TEXT_C = Component.text(" å‘ä½ å±•ç¤ºäº†ä¸€ä¸ªç‰©å“: ").color(NamedTextColor.GRAY);
 
     @SuppressWarnings({ "NullableProblems" })
     @Override
@@ -21,7 +21,7 @@ final class ShowItem implements CommandExecutor {
         if (!(s instanceof final Player p)) return false;
         final ItemStack i = p.getInventory().getItemInMainHand();
         if (i.getType() == Material.AIR) {
-            s.sendMessage("¡ìcÄãµÄÊÖÀïÃ»ÓĞÎïÆ·.");
+            s.sendMessage("Â§cä½ çš„æ‰‹é‡Œæ²¡æœ‰ç‰©å“.");
             return true;
         }
 

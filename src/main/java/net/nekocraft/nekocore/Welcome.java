@@ -11,7 +11,7 @@ final class Welcome implements CommandExecutor {
     @Override
     public boolean onCommand(final CommandSender s, final Command command, final String label, final String[] args) {
         if (!(s instanceof Player)) return false;
-        Bukkit.broadcastMessage("¡ìf" + s.getName() + "¡ì7: »¶Ó­ÐÂdalao!");
+        Bukkit.broadcastMessage("Â§f" + s.getName() + "Â§7: æ¬¢è¿Žæ–°dalao!");
         return true;
     }
 }

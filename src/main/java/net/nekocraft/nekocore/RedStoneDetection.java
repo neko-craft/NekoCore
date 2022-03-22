@@ -52,7 +52,7 @@ final class RedStoneDetection implements Listener, CommandExecutor {
         redStoneRecord.put(loc, i == 0 ? (i = 1) : ++i);
         if (i >= 30) {
             if (player != null) {
-                final TextComponent c = new TextComponent("¡ìc¸ßÆµºìÊ¯: ¡ìe(" +
+                final TextComponent c = new TextComponent("Â§cé«˜é¢‘çº¢çŸ³: Â§e(" +
                         loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," +
                         loc.getBlockZ() + ")");
                 c.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + loc.getBlockX() +
@@ -73,12 +73,12 @@ final class RedStoneDetection implements Listener, CommandExecutor {
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (!(sender instanceof Player)) return true;
         if (started) {
-            sender.sendMessage("¡ìe¸ßÆµºìÊ¯¼ì²â¡ìcÒÑÍ£Ö¹");
-            if (player != null && player != sender) player.sendMessage("¡ìe¸ßÆµºìÊ¯¼ì²â¡ìcÒÑÍ£Ö¹");
+            sender.sendMessage("Â§eé«˜é¢‘çº¢çŸ³æ£€æµ‹Â§cå·²åœæ­¢");
+            if (player != null && player != sender) player.sendMessage("Â§eé«˜é¢‘çº¢çŸ³æ£€æµ‹Â§cå·²åœæ­¢");
             stop();
         } else {
             player = (Player) sender;
-            sender.sendMessage("¡ìe¸ßÆµºìÊ¯¼ì²â¡ìa½øĞĞÖĞ");
+            sender.sendMessage("Â§eé«˜é¢‘çº¢çŸ³æ£€æµ‹Â§aè¿›è¡Œä¸­");
             start();
         }
         return true;
