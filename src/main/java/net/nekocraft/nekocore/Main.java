@@ -109,7 +109,7 @@ public final class Main extends JavaPlugin implements Listener {
         registerCommand("welcome", new Welcome());
         registerCommand("bedrock", this);
         registerCommand("toggle", (a, b, c, d) -> {
-            a.sendMessage("¡ìcÄ£Ê½ÇĞ»»ÃüÁîÒÑ¸ü¸ÄÎª ¡ìe/gamemode¡ìc. Ò²¿ÉÊ¹ÓÃ ¡ìeF3 + N ¡ìc½øĞĞÇĞ»».");
+            a.sendMessage("Â§cæ¨¡å¼åˆ‡æ¢å‘½ä»¤å·²æ›´æ”¹ä¸º Â§e/gamemodeÂ§c. ä¹Ÿå¯ä½¿ç”¨ Â§eF3 + N Â§cè¿›è¡Œåˆ‡æ¢.");
             return true;
         });
 
@@ -125,7 +125,7 @@ public final class Main extends JavaPlugin implements Listener {
                     if (tps < 4.5) i++;
                     else i = 0;
                     if (i > 20) {
-                        getServer().broadcastMessage("¡ìc·şÎñÆ÷ TPS µÍ, ½«ÔÚÎåÃëºó×Ô¶¯ÖØÆô!");
+                        getServer().broadcastMessage("Â§cæœåŠ¡å™¨ TPS ä½, å°†åœ¨äº”ç§’åè‡ªåŠ¨é‡å¯!");
                         try {
                             Thread.sleep(5000);
                         } catch (InterruptedException e) {
@@ -134,8 +134,8 @@ public final class Main extends JavaPlugin implements Listener {
                         getServer().shutdown();
                         return;
                     }
-                    final String footer = "\n¡ìaTPS: ¡ì7" + df.format(tps) + " ¡ìaMSPT: ¡ì7" +
-                            df.format(s.getTickTimes()[0] / 1000000.0) + "\n¡ìb¡ìm                                      ";
+                    final String footer = "\nÂ§aTPS: Â§7" + df.format(tps) + " Â§aMSPT: Â§7" +
+                            df.format(s.getTickTimes()[0] / 1000000.0) + "\nÂ§bÂ§m                                      ";
                     final ArrayList<Player> list = new ArrayList<>();
                     s.getOnlinePlayers().forEach(it -> {
                         it.setPlayerListFooter(footer);
@@ -151,8 +151,8 @@ public final class Main extends JavaPlugin implements Listener {
                                     final Entity[] es = c.getEntities();
                                     for (final Entity e : es) if (e instanceof Item || (e instanceof FallingBlock && !(e instanceof TNTPrimed)))
                                         e.remove();
-                                    if (c.getEntities().length < 200) s.broadcastMessage("¡ìcÕâ¸öÎ»ÖÃ ¡ì7(" + c.getWorld().getName() + ", " +
-                                            (c.getX() << 4) + ", " + (c.getZ() << 4) + ") ¡ìcÓĞÒ»´ó¶ÑÊµÌå, ÒÑ±»Çå³ı.");
+                                    if (c.getEntities().length < 200) s.broadcastMessage("Â§cè¿™ä¸ªä½ç½® Â§7(" + c.getWorld().getName() + ", " +
+                                            (c.getX() << 4) + ", " + (c.getZ() << 4) + ") Â§cæœ‰ä¸€å¤§å †å®ä½“, å·²è¢«æ¸…é™¤.");
                                 });
                             }
                         });
@@ -225,10 +225,10 @@ public final class Main extends JavaPlugin implements Listener {
         if (!command.getName().equalsIgnoreCase("bedrock") || !(sender instanceof Player)) return false;
         if (beList.contains(sender)) {
             beList.remove(sender);
-            sender.sendMessage("¡ìaÄúµ±Ç°ÒÑÀë¿ªÁË Bedrock Ä£Ê½!");
+            sender.sendMessage("Â§aæ‚¨å½“å‰å·²ç¦»å¼€äº† Bedrock æ¨¡å¼!");
         } else {
             beList.add((Player) sender);
-            sender.sendMessage("¡ìaÄúÒÑ½øÈë Bedrock Ä£Ê½!");
+            sender.sendMessage("Â§aæ‚¨å·²è¿›å…¥ Bedrock æ¨¡å¼!");
         }
         return true;
     }
@@ -236,23 +236,23 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerQuit(final PlayerQuitEvent e) {
         final Player player = e.getPlayer();
-        e.setQuitMessage("¡ìc- " + Utils.getDisplayName(player));
+        e.setQuitMessage("Â§c- " + Utils.getDisplayName(player));
         beList.remove(player);
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
-        e.setJoinMessage("¡ìa+ " + Utils.getDisplayName(e.getPlayer()));
+        e.setJoinMessage("Â§a+ " + Utils.getDisplayName(e.getPlayer()));
         final Player p = e.getPlayer();
         final Server s = getServer();
         p.setPlayerListHeader(Constants.PLAYER_HEADER);
         p.sendMessage(Constants.JOIN_MESSAGE_HEADER);
-        p.sendMessage("  ¡ìaµ±Ç°ÔÚÏßÍæ¼Ò: ¡ì7" + s.getOnlinePlayers().size() +
-                "                     ¡ìaµ±Ç°TPS: " + (int) s.getTPS()[0]);
+        p.sendMessage("  Â§aå½“å‰åœ¨çº¿ç©å®¶: Â§7" + s.getOnlinePlayers().size() +
+                "                     Â§aå½“å‰TPS: " + (int) s.getTPS()[0]);
         p.sendMessage(Constants.JOIN_MESSAGES);
         p.sendMessage(Constants.JOIN_MESSAGE1);
         p.sendMessage(Constants.JOIN_MESSAGE_FOOTER);
-        if (warning.remove(p)) p.sendMessage("¡ìe×¢Òâ: Äúµ±Ç°½øÈë·şÎñÆ÷ËùÊ¹ÓÃµÄÓòÃû½«»á±»·ÏÆú! ÇëÊ¹ÓÃ neko-craft.com ½øÈë·şÎñÆ÷!");
+        if (warning.remove(p)) p.sendMessage("Â§eæ³¨æ„: æ‚¨å½“å‰è¿›å…¥æœåŠ¡å™¨æ‰€ä½¿ç”¨çš„åŸŸåå°†ä¼šè¢«åºŸå¼ƒ! è¯·ä½¿ç”¨ neko-craft.com è¿›å…¥æœåŠ¡å™¨!");
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -267,7 +267,7 @@ public final class Main extends JavaPlugin implements Listener {
                         !url.endsWith("3b60a1f6d562f52aaebbf1434f1de147933a3affe0e764fa49ea057536623cd3")) needKick = false;
             }
         } catch (final Exception ignored) { }
-        if (needKick) e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "¡ìcÇëÏÈ¸øÄúµÄÓÎÏ·ÕË»§ÉèÖÃÒ»¸öÆ¤·ôÔÙ³¢ÊÔ½øÈë·şÎñÆ÷!");
+        if (needKick) e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "Â§cè¯·å…ˆç»™æ‚¨çš„æ¸¸æˆè´¦æˆ·è®¾ç½®ä¸€ä¸ªçš®è‚¤å†å°è¯•è¿›å…¥æœåŠ¡å™¨!");
     }
 
     @EventHandler
@@ -372,8 +372,8 @@ public final class Main extends JavaPlugin implements Listener {
                         reason == CreatureSpawnEvent.SpawnReason.COMMAND) return;
                 final Location l = e.getLocation();
                 if (l.getNearbyEntitiesByType(Villager.class, 48).size() > 50) {
-                    Bukkit.broadcastMessage("¡ìcÓĞÈËÔÚ ¡ì7" + l.getBlockX() + "," + l.getBlockY() + "," +
-                            l.getBlockZ() + " ¡ìc´óÁ¿·±Ö³´åÃñ.");
+                    Bukkit.broadcastMessage("Â§cæœ‰äººåœ¨ Â§7" + l.getBlockX() + "," + l.getBlockY() + "," +
+                            l.getBlockZ() + " Â§cå¤§é‡ç¹æ®–æ‘æ°‘.");
                 }
                 return;
         }
@@ -398,15 +398,15 @@ public final class Main extends JavaPlugin implements Listener {
             }
             final Player p = getServer().getPlayerExact(s);
             if (p != null) {
-                sb.append("¡ìa@").append(s).append("¡ì7");
-                p.sendMessage("¡ìaÒ»Î»½Ğ ¡ìf" + n + " ¡ìaµÄĞ¡ÅóÓÑ@ÁËÄã.");
+                sb.append("Â§a@").append(s).append("Â§7");
+                p.sendMessage("Â§aä¸€ä½å« Â§f" + n + " Â§açš„å°æœ‹å‹@äº†ä½ .");
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
                 isAt = true;
             } else sb.append(s);
             sb.append(' ');
         }
         final String value = sb.toString();
-        final String be = n + "¡ì7: " + value;
+        final String be = n + "Â§7: " + value;
         final TextComponent name = new TextComponent(n),
             text = new TextComponent(": " + value);
         name.setHoverEvent(Constants.AT);
@@ -444,7 +444,7 @@ public final class Main extends JavaPlugin implements Listener {
                     if (dmg instanceof EntityDamageByBlockEvent) {
                         final Block block = ((EntityDamageByBlockEvent) dmg).getDamager();
                         if (block != null && block.getType() == Material.STONECUTTER) {
-                            e.setDeathMessage(p.getName() + "ÁÑ¿ªÁË");
+                            e.setDeathMessage(p.getName() + "è£‚å¼€äº†");
                             ad = STONECUTTER;
                         }
                     }
@@ -511,8 +511,8 @@ public final class Main extends JavaPlugin implements Listener {
         if (e.getPlayer().isOp()) return;
         if (checkTrapChestExact(e.getBlock().getLocation())) {
             Player player = e.getPlayer();
-            getServer().broadcastMessage("¡ìcÍæ¼Ò ¡ìf" + player.getName() + " ¡ìcÕıÔÚ³¢ÊÔ´Ó³öÉúµã×êÊ¯ÏäÖĞÈ¡³öÎïÆ·!!");
-            player.banPlayer("¡ìc²»Òª³¢ÊÔÍµµÁ! ½â·âÇë½øÈëQQÈº: 7923309");
+            getServer().broadcastMessage("Â§cç©å®¶ Â§f" + player.getName() + " Â§cæ­£åœ¨å°è¯•ä»å‡ºç”Ÿç‚¹é’»çŸ³ç®±ä¸­å–å‡ºç‰©å“!!");
+            player.banPlayer("Â§cä¸è¦å°è¯•å·ç›—! è§£å°è¯·è¿›å…¥QQç¾¤: 7923309");
             e.setCancelled(true);
         } else if (checkTrapChest(e.getBlock().getLocation())) e.setCancelled(true);
     }
@@ -529,8 +529,8 @@ public final class Main extends JavaPlugin implements Listener {
         if (holder instanceof Chest && e.getWhoClicked() instanceof Player) {
             if (e.getClickedInventory() == e.getView().getTopInventory() && checkTrapChestExact(((Chest) holder).getLocation())) {
                 Player player = (Player) e.getWhoClicked();
-                getServer().broadcastMessage("¡ìcÍæ¼Ò ¡ìf" + player.getName() + " ¡ìcÕıÔÚ³¢ÊÔ´Ó³öÉúµã×êÊ¯ÏäÖĞÈ¡³öÎïÆ·!!");
-                player.banPlayer("¡ìc²»Òª³¢ÊÔÍµµÁ! ½â·âÇë½øÈëQQÈº: 7923309");
+                getServer().broadcastMessage("Â§cç©å®¶ Â§f" + player.getName() + " Â§cæ­£åœ¨å°è¯•ä»å‡ºç”Ÿç‚¹é’»çŸ³ç®±ä¸­å–å‡ºç‰©å“!!");
+                player.banPlayer("Â§cä¸è¦å°è¯•å·ç›—! è§£å°è¯·è¿›å…¥QQç¾¤: 7923309");
             }
         }
     }
@@ -588,14 +588,14 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerCommand(final PlayerCommandPreprocessEvent e) {
         if (isDangerCommand(e.getMessage())) {
-            e.getPlayer().sendMessage("¡ìcÎ£ÏÕµÄÖ¸ÁîÒÑ±»¾Ü¾øÖ´ĞĞ!");
+            e.getPlayer().sendMessage("Â§cå±é™©çš„æŒ‡ä»¤å·²è¢«æ‹’ç»æ‰§è¡Œ!");
             e.setCancelled(true);
         } else if (e.getMessage().startsWith("sethome") || e.getMessage().startsWith("/sethome")) Utils.giveAdvancement(HOME, e.getPlayer());
     }
     @EventHandler(ignoreCancelled = true)
     public void onServerCommand(final ServerCommandEvent e) {
         if (isDangerCommand(e.getCommand())) {
-            e.getSender().sendMessage("¡ìcÎ£ÏÕµÄÖ¸ÁîÒÑ±»¾Ü¾øÖ´ĞĞ!");
+            e.getSender().sendMessage("Â§cå±é™©çš„æŒ‡ä»¤å·²è¢«æ‹’ç»æ‰§è¡Œ!");
             e.setCancelled(true);
         }
     }
@@ -609,7 +609,7 @@ public final class Main extends JavaPlugin implements Listener {
             e.setCancelled(true);
             loc.getNearbyPlayers(6).forEach(it -> {
                 it.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 20 * 120, 5, true, false));
-                it.sendMessage("¡ìcÇë²»ÒªÔÚ¾àÀëÊÀ½ç³öÉúµã7¸öÇø¿éÒÔÄÚÍæ±¬Õ¨Îï!");
+                it.sendMessage("Â§cè¯·ä¸è¦åœ¨è·ç¦»ä¸–ç•Œå‡ºç”Ÿç‚¹7ä¸ªåŒºå—ä»¥å†…ç©çˆ†ç‚¸ç‰©!");
             });
         }
     }

@@ -30,7 +30,7 @@ import java.util.Objects;
 
 @SuppressWarnings("deprecation")
 final class Rules implements Listener, CommandExecutor {
-    private static final String ITEM_NAME = "¡ìe·şÎñÆ÷¹æÔò¶şÎ¬Âë", NOT_ACCEPTED = "¡ìcÄã»¹Ã»ÓĞ´ò¿ªÁÄÌì¿òµã»÷¡ìa[Í¬Òâ·şÎñÆ÷¹æ¶¨]¡ìc!";
+    private static final String ITEM_NAME = "Â§eæœåŠ¡å™¨è§„åˆ™äºŒç»´ç ", NOT_ACCEPTED = "Â§cä½ è¿˜æ²¡æœ‰æ‰“å¼€èŠå¤©æ¡†ç‚¹å‡»Â§a[åŒæ„æœåŠ¡å™¨è§„å®š]Â§c!";
     private static final Render render = new Render();
     private final Location spawn;
     private final MapView map = Bukkit.createMap(Objects.requireNonNull(Bukkit.getWorld("world")));
@@ -60,10 +60,10 @@ final class Rules implements Listener, CommandExecutor {
 
         Objects.requireNonNull(main.getServer().getPluginCommand("denyrule")).setExecutor((sender, c, l, a) -> {
             if (!(sender instanceof final Player p)) return false;
-            if (notAccepts.contains(p)) p.kickPlayer("¡ìe[NekoCraft] ¡ìcÄã¾Ü¾ø×ñÊØ·şÎñÆ÷¹æ¶¨.");
+            if (notAccepts.contains(p)) p.kickPlayer("Â§e[NekoCraft] Â§cä½ æ‹’ç»éµå®ˆæœåŠ¡å™¨è§„å®š.");
             else {
                 removeMap(p);
-                p.sendMessage("¡ìcÄãÒÑ¾­Í¬Òâ×ñÊØÁË·şÎñÆ÷¹æ¶¨!");
+                p.sendMessage("Â§cä½ å·²ç»åŒæ„éµå®ˆäº†æœåŠ¡å™¨è§„å®š!");
             }
             return true;
         });
@@ -93,7 +93,7 @@ final class Rules implements Listener, CommandExecutor {
         meta.setMapView(map);
         meta.setDisplayName(ITEM_NAME);
         meta.setColor(Color.YELLOW);
-        meta.setLocationName("¶şÎ¬Âë");
+        meta.setLocationName("äºŒç»´ç ");
         meta.setUnbreakable(true);
         meta.setLore(Lists.newArrayList(ITEM_NAME));
         is.setItemMeta(meta);
@@ -152,9 +152,9 @@ final class Rules implements Listener, CommandExecutor {
                 writer.write(text);
                 writer.close();
             } catch (IOException e) { e.printStackTrace(); }
-            p.sendMessage("¡ìa¸ĞĞ»Äú½ÓÊÜÁË·şÎñÆ÷µÄ¹æ¶¨, Í¬Ê±Ò²Ï£ÍûÄúÄÜÒ»Ö±×ñÊØ¹æ¶¨!");
+            p.sendMessage("Â§aæ„Ÿè°¢æ‚¨æ¥å—äº†æœåŠ¡å™¨çš„è§„å®š, åŒæ—¶ä¹Ÿå¸Œæœ›æ‚¨èƒ½ä¸€ç›´éµå®ˆè§„å®š!");
             p.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
-            Bukkit.broadcastMessage("¡ìb»¶Ó­ĞÂÍæ¼Ò ¡ì7" + p.getDisplayName() + " ¡ìb¼ÓÈëÁË·şÎñÆ÷!");
+            Bukkit.broadcastMessage("Â§bæ¬¢è¿æ–°ç©å®¶ Â§7" + p.getDisplayName() + " Â§båŠ å…¥äº†æœåŠ¡å™¨!");
         }
         Utils.giveAdvancement(ROOT, p);
         return true;

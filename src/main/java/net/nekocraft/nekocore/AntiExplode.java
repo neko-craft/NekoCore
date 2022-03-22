@@ -19,12 +19,12 @@ final class AntiExplode implements CommandExecutor, Listener {
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (flag) {
             flag = false;
-            if (sender.isOp()) sender.sendMessage("¡ìaµ±Ç°·şÎñÆ÷µÄTNT±¬Õ¨ÒÑ¿ªÆô!");
-            else Bukkit.broadcastMessage("¡ìaµ±Ç°·şÎñÆ÷µÄTNT±¬Õ¨ÒÑ¿ªÆô!");
+            if (sender.isOp()) sender.sendMessage("Â§aå½“å‰æœåŠ¡å™¨çš„TNTçˆ†ç‚¸å·²å¼€å¯!");
+            else Bukkit.broadcastMessage("Â§aå½“å‰æœåŠ¡å™¨çš„TNTçˆ†ç‚¸å·²å¼€å¯!");
         } else {
             flag = true;
-            if (sender.isOp()) sender.sendMessage("¡ìeµ±Ç°·şÎñÆ÷µÄTNT±¬Õ¨ÒÑ¹Ø±Õ!");
-            else Bukkit.broadcastMessage("¡ìeµ±Ç°·şÎñÆ÷µÄTNT±¬Õ¨ÒÑ¹Ø±Õ!");
+            if (sender.isOp()) sender.sendMessage("Â§eå½“å‰æœåŠ¡å™¨çš„TNTçˆ†ç‚¸å·²å…³é—­!");
+            else Bukkit.broadcastMessage("Â§eå½“å‰æœåŠ¡å™¨çš„TNTçˆ†ç‚¸å·²å…³é—­!");
         }
         return true;
     }
@@ -40,9 +40,9 @@ final class AntiExplode implements CommandExecutor, Listener {
         if (flag && (e.getEntityType() == EntityType.WITHER || e.getEntityType() == EntityType.ENDER_DRAGON)) {
             e.setCancelled(true);
             Location loc = e.getLocation();
-            Bukkit.broadcastMessage("¡ìc" + loc.getNearbyPlayers(16).stream().findFirst()
-                    .map(HumanEntity::getName).orElse("ÓĞÈË") + "³¢ÊÔÔÚ (" + loc.getWorld().getName() + ", " +
-                    loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ") Éú³ÉµòÁã»òÄ©Ó°Áú!");
+            Bukkit.broadcastMessage("Â§c" + loc.getNearbyPlayers(16).stream().findFirst()
+                    .map(HumanEntity::getName).orElse("æœ‰äºº") + "å°è¯•åœ¨ (" + loc.getWorld().getName() + ", " +
+                    loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ") ç”Ÿæˆå‡‹é›¶æˆ–æœ«å½±é¾™!");
         }
     }
 }
